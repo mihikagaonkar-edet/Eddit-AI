@@ -1,0 +1,40 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Bebas Neue", sans-serif;
+  --font-body: "Inter", system-ui, sans-serif;
+  --color-charcoal: #141418;
+  --color-charcoal-light: #1c1c22;
+  --color-charcoal-card: #222228;
+  --color-off-white: #f2f0eb;
+  --color-muted: #8a8890;
+  --color-accent: #e85d4c;
+  --color-accent-glow: #ff7a6b;
+  --color-gold: #d4a853;
+}
+
+body {
+  @apply bg-charcoal text-off-white font-body antialiased;
+  margin: 0;
+  min-height: 100vh;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+.font-display {
+  font-family: var(--font-display);
+  letter-spacing: 0.04em;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-charcoal);
+}
+::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 3px;
+}
