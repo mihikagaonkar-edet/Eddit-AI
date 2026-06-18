@@ -6,6 +6,7 @@ import { api, mediaUrl } from '../api/client';
 import type { Argument } from '../types';
 import { VideoRecorder } from './VideoRecorder';
 import { useAuth } from '../context/AuthContext';
+import { TeamBadge } from './TeamBadge';
 
 interface Props {
   targetType: string;
@@ -57,15 +58,13 @@ function ArgumentCard({
 
   return (
     <div style={{ marginLeft: depth * 16 }} className="mt-3">
-      <div className="bg-charcoal-light rounded-xl p-4 border border-white/5">
-        <div className="flex items-center gap-2 mb-2">
-          <Link to={`/profile/${argument.author.username}`} className="font-medium text-sm hover:text-accent">
+      <div className="draft-card-row p-4">
+        <div className="flex items-center gap-2 mb-2 flex-wrap">
+          <Link to={`/profile/${argument.author.username}`} className="font-display text-sm tracking-wide hover:text-accent">
             {argument.author.name}
           </Link>
           {argument.author.current_team_artist && (
-            <span className="text-xs text-muted">
-              Team {argument.author.current_team_artist.name}
-            </span>
+            <TeamBadge name={argument.author.current_team_artist.name} className="text-[9px] px-2 py-0.5" />
           )}
         </div>
 
@@ -105,19 +104,19 @@ function ArgumentCard({
                 value={text}
                 onChange={(e) => setText(e.target.value)}
                 placeholder="Make your argument..."
-                className="w-full bg-charcoal-card border border-white/10 rounded-xl p-3 text-sm resize-none h-20 focus:outline-none focus:border-accent/50"
+                className="w-full draft-card p-3 text-sm resize-none h-20 focus:outline-none focus:border-accent/40"
               />
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-wrap">
                 <button
                   onClick={() => replyMutation.mutate({ text })}
                   disabled={!text.trim()}
-                  className="px-4 py-2 bg-accent rounded-lg text-sm font-medium disabled:opacity-40"
+                  className="px-4 py-2 btn-primary text-sm disabled:opacity-40"
                 >
                   Post Argument
                 </button>
                 <button
                   onClick={() => setShowVideo(!showVideo)}
-                  className="px-4 py-2 border border-white/15 rounded-lg text-sm"
+                  className="px-4 py-2 btn-ghost text-sm"
                 >
                   Video Argument
                 </button>
@@ -184,7 +183,7 @@ export function ArgumentThread({ targetType, targetId }: Props) {
     <div>
       <button
         onClick={() => setOpen(!open)}
-        className="text-sm text-accent hover:text-accent-glow font-medium"
+        className="text-sm text-accent hover:text-accent-glow font-display tracking-wide"
       >
         {open ? 'Close Debate' : 'Start Argument'}
       </button>
@@ -203,19 +202,19 @@ export function ArgumentThread({ targetType, targetId }: Props) {
                   value={text}
                   onChange={(e) => setText(e.target.value)}
                   placeholder="Why is this ranking wrong?"
-                  className="w-full bg-charcoal-card border border-white/10 rounded-xl p-3 text-sm resize-none h-24 focus:outline-none focus:border-accent/50"
+                  className="w-full draft-card p-3 text-sm resize-none h-24 focus:outline-none focus:border-accent/40"
                 />
-                <div className="flex gap-2">
+                <div className="flex gap-2 flex-wrap">
                   <button
                     onClick={() => createMutation.mutate({ text })}
                     disabled={!text.trim()}
-                    className="px-4 py-2 bg-accent rounded-lg text-sm font-medium disabled:opacity-40"
+                    className="px-4 py-2 btn-primary text-sm disabled:opacity-40"
                   >
                     Post Argument
                   </button>
                   <button
                     onClick={() => setShowVideo(!showVideo)}
-                    className="px-4 py-2 border border-white/15 rounded-lg text-sm"
+                    className="px-4 py-2 btn-ghost text-sm"
                   >
                     Video Argument
                   </button>

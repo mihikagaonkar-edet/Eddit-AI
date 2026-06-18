@@ -19,15 +19,18 @@ export function ArtistsPage() {
   }, [artists, search]);
 
   return (
-    <div className="max-w-2xl mx-auto px-4 pt-6 space-y-6">
-      <h1 className="font-display text-3xl">Artists</h1>
+    <div className="max-w-2xl mx-auto px-4 pt-6 space-y-6 pb-8">
+      <div>
+        <p className="draft-label">Roster</p>
+        <h1 className="font-display text-4xl text-off-white mt-1">Artists</h1>
+      </div>
 
       <input
         type="search"
         placeholder="Search artists by name..."
         value={search}
         onChange={(e) => setSearch(e.target.value)}
-        className="w-full bg-charcoal-card border border-white/10 rounded-xl px-4 py-2.5 text-sm text-off-white placeholder:text-muted focus:outline-none focus:border-accent/50"
+        className="w-full draft-card px-4 py-2.5 text-sm text-off-white placeholder:text-muted focus:outline-none focus:border-accent/40"
       />
 
       {isLoading && <p className="text-muted">Loading...</p>}
@@ -37,15 +40,15 @@ export function ArtistsPage() {
           <p className="text-muted text-sm">
             {filtered.length} artist{filtered.length === 1 ? '' : 's'}
           </p>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
             {filtered.map((artist) => (
               <Link
                 key={artist.id}
                 to={`/artists/${artist.id}`}
-                className="bg-charcoal-card rounded-2xl p-4 border border-white/8 hover:border-accent/30 transition-all flex flex-col items-center text-center gap-2"
+                className="draft-card p-4 hover:border-accent/30 transition-colors flex flex-col items-center text-center gap-2"
               >
                 <ArtistAvatar name={artist.name} size="lg" />
-                <p className="font-display text-lg">{artist.name}</p>
+                <p className="font-display text-base tracking-wide">{artist.name}</p>
                 {artist.rating != null && (
                   <p className="text-gold text-xs">★ {artist.rating}</p>
                 )}

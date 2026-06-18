@@ -20,7 +20,7 @@ export function SignOutButton({ className = '', compact = false }: Props) {
       <button
         type="button"
         onClick={handleSignOut}
-        className={`text-sm text-muted border border-white/10 px-3 py-1.5 rounded-lg hover:text-off-white hover:bg-white/5 transition-colors ${className}`}
+        className={`text-xs font-semibold draft-label border border-white/15 px-3 py-1.5 hover:text-off-white hover:border-white/30 transition-colors ${className}`}
       >
         Sign out
       </button>
@@ -31,7 +31,7 @@ export function SignOutButton({ className = '', compact = false }: Props) {
     <button
       type="button"
       onClick={handleSignOut}
-      className={`w-full text-left px-4 py-3 rounded-xl text-sm font-medium text-muted hover:text-off-white hover:bg-white/5 transition-colors ${className}`}
+      className={`w-full text-left px-4 py-3 text-sm font-medium text-muted hover:text-off-white hover:bg-white/5 transition-colors border-t border-white/5 ${className}`}
     >
       Sign out
     </button>

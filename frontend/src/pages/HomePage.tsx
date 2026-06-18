@@ -96,9 +96,10 @@ export function HomePage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 pt-6 pb-8 space-y-4">
-      <header>
-        <h1 className="font-display text-5xl text-accent md:hidden">EDDIT</h1>
-        <p className="font-display text-2xl md:text-3xl mt-2 tracking-wide">Show us your Top 5.</p>
+      <header className="mb-2">
+        <h1 className="font-display text-5xl text-accent md:hidden tracking-widest">EDDIT</h1>
+        <p className="draft-label mt-1">Discovery</p>
+        <p className="font-display text-2xl md:text-4xl mt-1 text-off-white">Show us your Top 5.</p>
       </header>
 
       <input
@@ -106,7 +107,7 @@ export function HomePage() {
         placeholder="Search artists by name..."
         value={search}
         onChange={(e) => setSearch(e.target.value)}
-        className="w-full bg-charcoal-card border border-white/10 rounded-xl px-4 py-2.5 text-sm text-off-white placeholder:text-muted focus:outline-none focus:border-accent/50"
+        className="w-full draft-card px-4 py-2.5 text-sm text-off-white placeholder:text-muted focus:outline-none focus:border-accent/40"
       />
 
       <div className="flex flex-wrap gap-3 items-center">
@@ -115,7 +116,7 @@ export function HomePage() {
           <select
             value={sortField}
             onChange={(e) => setSortField(e.target.value as SortField)}
-            className="bg-charcoal-card border border-white/10 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-accent/50"
+            className="draft-card px-3 py-2 text-sm focus:outline-none focus:border-accent/40"
           >
             {SORT_OPTIONS.map((opt) => (
               <option key={opt.value} value={opt.value}>
@@ -129,8 +130,8 @@ export function HomePage() {
           <button
             type="button"
             onClick={() => setSortDirection('asc')}
-            className={`px-3 py-2 transition-colors ${
-              sortDirection === 'asc' ? 'bg-accent text-white' : 'bg-charcoal-card text-muted hover:text-off-white'
+            className={`px-3 py-2 transition-colors font-medium ${
+              sortDirection === 'asc' ? 'bg-accent text-charcoal' : 'bg-charcoal-card text-muted hover:text-off-white'
             }`}
           >
             Asc
@@ -138,8 +139,8 @@ export function HomePage() {
           <button
             type="button"
             onClick={() => setSortDirection('desc')}
-            className={`px-3 py-2 transition-colors ${
-              sortDirection === 'desc' ? 'bg-accent text-white' : 'bg-charcoal-card text-muted hover:text-off-white'
+            className={`px-3 py-2 transition-colors font-medium ${
+              sortDirection === 'desc' ? 'bg-accent text-charcoal' : 'bg-charcoal-card text-muted hover:text-off-white'
             }`}
           >
             Desc
@@ -154,14 +155,14 @@ export function HomePage() {
       {isLoading && <p className="text-muted">Loading artists...</p>}
 
       {!isLoading && (
-        <div className="overflow-x-auto rounded-xl border border-white/10">
+        <div className="overflow-x-auto draft-card">
           <table className="w-full text-sm">
             <thead>
-              <tr className="bg-charcoal-light border-b border-white/10">
+              <tr className="border-b border-white/10">
                 {COLUMNS.map((col) => (
                   <th
                     key={col.key}
-                    className={`px-3 py-3 font-medium text-muted whitespace-nowrap ${
+                    className={`px-3 py-3 draft-label whitespace-nowrap ${
                       col.align === 'right' ? 'text-right' : 'text-left'
                     }`}
                   >
@@ -171,18 +172,20 @@ export function HomePage() {
               </tr>
             </thead>
             <tbody>
-              {filtered.map((artist) => (
+              {filtered.map((artist, idx) => (
                 <tr
                   key={artist.id}
                   onClick={() => navigate(`/artists/${artist.id}`)}
-                  className="border-b border-white/5 hover:bg-white/5 cursor-pointer transition-colors"
+                  className={`border-b border-white/5 hover:bg-white/5 cursor-pointer transition-colors ${
+                    idx === 0 && sortField === 'rating' && sortDirection === 'desc' ? 'border-l-2 border-l-gold' : ''
+                  }`}
                 >
                   {COLUMNS.map((col) => (
                     <td
                       key={col.key}
                       className={`px-3 py-3 whitespace-nowrap ${
                         col.align === 'right' ? 'text-right tabular-nums' : 'text-left'
-                      } ${col.key === 'name' ? 'font-medium' : 'text-off-white/90'}`}
+                      } ${col.key === 'name' ? 'font-display text-base tracking-wide' : 'text-off-white/90'}`}
                     >
                       {cellValue(artist, col.key)}
                     </td>

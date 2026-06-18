@@ -6,7 +6,9 @@ import { Top5Display } from '../components/Top5Display';
 import { Top5Picker } from '../components/Top5Picker';
 import { ArgumentThread } from '../components/ArgumentThread';
 import { SignOutButton } from '../components/SignOutButton';
+import { ArtistAvatar } from '../components/ArtistAvatar';
 import { useAuth } from '../context/AuthContext';
+import { formatArtistName } from '../utils/formatArtistName';
 import type { Artist, Top5Item } from '../types';
 
 export function ProfilePage() {
@@ -48,40 +50,58 @@ export function ProfilePage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-4 pt-6 space-y-6 pb-8">
+    <div className="max-w-2xl mx-auto px-4 pt-6 space-y-8 pb-8">
       {profile && (
-        <header className="space-y-2">
-          <div className="flex items-start justify-between">
-            <div>
-              <h1 className="font-display text-3xl">{profile.name}</h1>
-              <p className="text-muted">@{profile.username}</p>
-              {profile.city && <p className="text-sm text-muted mt-1">📍 {profile.city}</p>}
-            </div>
-            {isOwnProfile && currentUser && (
-              <div className="flex flex-col gap-2 items-end">
-                <button
-                  onClick={() => setEditing(!editing)}
-                  className="text-sm text-accent border border-accent/30 px-3 py-1.5 rounded-lg hover:bg-accent/10"
-                >
-                  {editing ? 'Cancel' : 'Edit Top 5'}
-                </button>
-                <SignOutButton compact className="md:hidden" />
-              </div>
+        <header className="draft-card p-4 sm:p-5 border-white/8">
+          <div className="flex items-start gap-4">
+            {profile.current_team_artist && (
+              <Link
+                to={`/teams/${profile.current_team_artist.id}`}
+                className="shrink-0 border-2 border-accent/30 bg-charcoal-light p-1 shadow-[3px_3px_0_rgba(255,107,74,0.2)]"
+              >
+                <ArtistAvatar name={profile.current_team_artist.name} size="xl" />
+              </Link>
             )}
+
+            <div className="flex-1 min-w-0">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="draft-label mb-1">Fan Identity</p>
+                  <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                    <h1 className="font-serif text-2xl sm:text-3xl text-off-white leading-tight">
+                      {profile.name}
+                    </h1>
+                    {profile.current_team_artist && (
+                      <Link
+                        to={`/teams/${profile.current_team_artist.id}`}
+                        className="font-serif text-3xl sm:text-4xl lg:text-5xl text-accent hover:text-accent-glow transition-colors leading-none tracking-wide"
+                      >
+                        Team {formatArtistName(profile.current_team_artist.name)}
+                      </Link>
+                    )}
+                  </div>
+                  <p className="text-muted text-sm mt-2">@{profile.username}</p>
+                  {profile.city && <p className="text-muted text-xs mt-1">📍 {profile.city}</p>}
+                </div>
+
+                {isOwnProfile && currentUser && (
+                  <div className="flex flex-col gap-2 items-end shrink-0">
+                    <button
+                      onClick={() => setEditing(!editing)}
+                      className="text-xs font-semibold text-accent border-2 border-accent/40 px-3 py-1.5 rounded-lg hover:bg-accent/10"
+                    >
+                      {editing ? 'Cancel' : 'Edit Top 5'}
+                    </button>
+                    <SignOutButton compact className="md:hidden" />
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
-          {profile.current_team_artist && (
-            <Link
-              to={`/teams/${profile.current_team_artist.id}`}
-              className="inline-block bg-accent/15 text-accent text-sm px-3 py-1 rounded-full font-medium"
-            >
-              Team {profile.current_team_artist.name}
-            </Link>
-          )}
         </header>
       )}
 
       <section>
-        <h2 className="font-display text-2xl mb-4 tracking-wide">Top 5</h2>
         {editing && isOwnProfile ? (
           <EditTop5 onDone={() => { setEditing(false); queryClient.invalidateQueries({ queryKey: ['top5', username] }); }} />
         ) : top5 && top5.items.length > 0 ? (
@@ -91,10 +111,11 @@ export function ProfilePage() {
             onArgue={(item) => setArguingItem(item)}
           />
         ) : (
-          <div className="bg-charcoal-card rounded-2xl p-8 text-center border border-dashed border-white/15">
-            <p className="text-muted">No Top 5 set yet</p>
+          <div className="draft-card p-8 text-center border-dashed border-white/15">
+            <h2 className="font-serif text-2xl text-gold mb-2">Top 5</h2>
+            <p className="text-muted text-sm">No Top 5 set yet</p>
             {isOwnProfile && (
-              <button onClick={() => setEditing(true)} className="text-accent mt-2 text-sm font-medium">
+              <button onClick={() => setEditing(true)} className="text-accent mt-3 text-sm font-semibold">
                 Build your Top 5
               </button>
             )}
@@ -103,7 +124,7 @@ export function ProfilePage() {
       </section>
 
       {arguingItem && (
-        <section className="bg-charcoal-card rounded-2xl p-4 border border-white/10">
+        <section className="draft-card p-4">
           <p className="text-sm text-muted mb-2">
             Arguing about <span className="text-off-white font-medium">#{arguingItem.position} {arguingItem.artist.name}</span>
           </p>
@@ -114,7 +135,7 @@ export function ProfilePage() {
 
       {profile && (
         <section>
-          <h2 className="font-display text-xl mb-3">Profile Arguments</h2>
+          <p className="draft-label mb-3">Profile Arguments</p>
           <ArgumentThread targetType="profile" targetId={profile.id} />
         </section>
       )}
@@ -154,7 +175,7 @@ function EditTop5({ onDone }: { onDone: () => void }) {
       <button
         onClick={save}
         disabled={saving || selected.size !== 5}
-        className="w-full bg-accent hover:bg-accent-glow text-white font-medium py-3 rounded-xl disabled:opacity-40 transition-colors"
+        className="w-full btn-primary py-3 disabled:opacity-40"
       >
         {saving ? 'Saving...' : 'Save Top 5'}
       </button>

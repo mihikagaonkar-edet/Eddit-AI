@@ -1,4 +1,40 @@
+import { formatArtistName } from '../utils/formatArtistName';
+
 const API_BASE = '';
+
+function isArtistRecord(record: Record<string, unknown>): boolean {
+  if (typeof record.name !== 'string') return false;
+  if ('username' in record) return false;
+  if ('position' in record && 'artist' in record) return false;
+  return (
+    'rating' in record ||
+    'billboard_top_10' in record ||
+    'billboard_number_1' in record ||
+    'albums_sold' in record ||
+    'singles_sold' in record ||
+    'youtube_views' in record ||
+    'spotify_monthly_listeners' in record
+  );
+}
+
+function normalizeArtistNames(data: unknown): unknown {
+  if (data === null || data === undefined) return data;
+  if (Array.isArray(data)) return data.map(normalizeArtistNames);
+  if (typeof data !== 'object') return data;
+
+  const record = data as Record<string, unknown>;
+  const result: Record<string, unknown> = {};
+
+  for (const [key, value] of Object.entries(record)) {
+    if (key === 'name' && isArtistRecord(record)) {
+      result[key] = formatArtistName(value as string);
+    } else {
+      result[key] = normalizeArtistNames(value);
+    }
+  }
+
+  return result;
+}
 
 function getToken(): string | null {
   return localStorage.getItem('eddit_token');
@@ -19,7 +55,8 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
     const err = await res.json().catch(() => ({ detail: res.statusText }));
     throw new Error(err.detail || 'Request failed');
   }
-  return res.json();
+  const data = await res.json();
+  return normalizeArtistNames(data) as T;
 }
 
 export const api = {

@@ -1,22 +1,26 @@
 @import "tailwindcss";
 
 @theme {
-  --font-display: "Bebas Neue", sans-serif;
-  --font-body: "Inter", system-ui, sans-serif;
-  --color-charcoal: #141418;
-  --color-charcoal-light: #1c1c22;
-  --color-charcoal-card: #222228;
-  --color-off-white: #f2f0eb;
-  --color-muted: #8a8890;
-  --color-accent: #e85d4c;
-  --color-accent-glow: #ff7a6b;
-  --color-gold: #d4a853;
+  --font-display: "Barlow Condensed", sans-serif;
+  --font-body: "Source Sans 3", system-ui, sans-serif;
+  --font-serif: "Playfair Display", Georgia, "Times New Roman", serif;
+  --color-charcoal: #16141c;
+  --color-charcoal-light: #1e1b24;
+  --color-charcoal-card: #252029;
+  --color-off-white: #f5f0e8;
+  --color-muted: #9a939e;
+  --color-accent: #ff6b4a;
+  --color-accent-glow: #ff8566;
+  --color-gold: #d4af37;
 }
 
 body {
   @apply bg-charcoal text-off-white font-body antialiased;
   margin: 0;
   min-height: 100vh;
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(212, 175, 55, 0.06), transparent),
+    radial-gradient(ellipse 60% 40% at 100% 100%, rgba(255, 107, 74, 0.04), transparent);
 }
 
 #root {
@@ -25,7 +29,45 @@ body {
 
 .font-display {
   font-family: var(--font-display);
-  letter-spacing: 0.04em;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.font-serif {
+  font-family: var(--font-serif);
+  letter-spacing: 0.02em;
+}
+
+.top5-pick-one {
+  @apply bg-charcoal-card border-2 border-gold rounded-lg;
+}
+
+.top5-stat-label {
+  @apply text-[9px] font-display tracking-[0.15em] uppercase;
+}
+
+.draft-card {
+  @apply bg-charcoal-card border border-white/6 rounded-lg overflow-hidden;
+}
+
+.draft-card-hero {
+  @apply bg-charcoal-card border border-white/6 rounded-lg overflow-hidden border-l-4 border-l-gold;
+}
+
+.draft-card-row {
+  @apply bg-charcoal-card border border-white/6 rounded-lg overflow-hidden border-l-2 border-l-white/10;
+}
+
+.draft-label {
+  @apply text-[10px] font-display tracking-[0.2em] text-muted uppercase;
+}
+
+.btn-primary {
+  @apply bg-accent hover:bg-accent-glow text-charcoal font-semibold rounded-lg transition-colors;
+}
+
+.btn-ghost {
+  @apply border border-white/15 text-off-white hover:bg-white/5 rounded-lg transition-colors;
 }
 
 ::-webkit-scrollbar {
@@ -35,6 +77,6 @@ body {
   background: var(--color-charcoal);
 }
 ::-webkit-scrollbar-thumb {
-  background: #333;
+  background: #3d3844;
   border-radius: 3px;
 }

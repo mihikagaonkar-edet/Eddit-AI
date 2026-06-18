@@ -19,10 +19,11 @@ export function TeamsPage() {
   }, [teams, search]);
 
   return (
-    <div className="max-w-2xl mx-auto px-4 pt-6 space-y-6">
+    <div className="max-w-2xl mx-auto px-4 pt-6 space-y-6 pb-8">
       <div>
-        <h1 className="font-display text-3xl">Teams</h1>
-        <p className="text-muted text-sm mt-1">Pick your allegiance. One team. All in.</p>
+        <p className="draft-label">Allegiance</p>
+        <h1 className="font-display text-4xl text-off-white mt-1">Teams</h1>
+        <p className="text-muted text-sm mt-1">Pick your artist. One team. All in.</p>
       </div>
 
       <input
@@ -30,7 +31,7 @@ export function TeamsPage() {
         placeholder="Search teams by artist name..."
         value={search}
         onChange={(e) => setSearch(e.target.value)}
-        className="w-full bg-charcoal-card border border-white/10 rounded-xl px-4 py-2.5 text-sm text-off-white placeholder:text-muted focus:outline-none focus:border-accent/50"
+        className="w-full draft-card px-4 py-2.5 text-sm text-off-white placeholder:text-muted focus:outline-none focus:border-accent/40"
       />
 
       {isLoading && <p className="text-muted">Loading...</p>}
@@ -40,16 +41,18 @@ export function TeamsPage() {
           <p className="text-muted text-sm">
             {filtered.length} team{filtered.length === 1 ? '' : 's'}
           </p>
-          <div className="space-y-3">
-            {filtered.map((team) => (
+          <div className="space-y-1.5">
+            {filtered.map((team, i) => (
               <Link
                 key={team.id}
                 to={`/teams/${team.id}`}
-                className="flex items-center gap-4 bg-charcoal-card rounded-2xl p-4 border border-white/8 hover:border-accent/30 transition-all"
+                className={`flex items-center gap-4 p-4 transition-colors hover:border-accent/30 ${
+                  i === 0 ? 'draft-card-hero' : 'draft-card-row'
+                }`}
               >
                 <ArtistAvatar name={team.name} size="lg" />
                 <div>
-                  <p className="font-display text-xl text-accent">Team {team.name}</p>
+                  <p className="font-display text-xl text-accent tracking-wide">Team {team.name}</p>
                   {team.rating != null && (
                     <p className="text-gold text-sm">★ {team.rating}</p>
                   )}

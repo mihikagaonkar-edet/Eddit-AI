@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { api } from '../api/client';
+import { TeamBadge } from '../components/TeamBadge';
 import type { UserPeopleItem } from '../types';
 
 export function PeoplePage() {
@@ -26,7 +27,8 @@ export function PeoplePage() {
   return (
     <div className="max-w-3xl mx-auto px-4 pt-6 space-y-6 pb-8">
       <div>
-        <h1 className="font-display text-3xl">People</h1>
+        <p className="draft-label">Community</p>
+        <h1 className="font-display text-4xl text-off-white mt-1">People</h1>
         <p className="text-muted text-sm mt-1">Discover fans by their Top 5 and team.</p>
       </div>
 
@@ -35,7 +37,7 @@ export function PeoplePage() {
         placeholder="Search by name, username, or team..."
         value={search}
         onChange={(e) => setSearch(e.target.value)}
-        className="w-full bg-charcoal-card border border-white/10 rounded-xl px-4 py-2.5 text-sm text-off-white placeholder:text-muted focus:outline-none focus:border-accent/50"
+        className="w-full draft-card px-4 py-2.5 text-sm text-off-white placeholder:text-muted focus:outline-none focus:border-accent/40"
       />
 
       {isLoading && <p className="text-muted">Loading...</p>}
@@ -45,7 +47,7 @@ export function PeoplePage() {
           <p className="text-muted text-sm">
             {filtered.length} {filtered.length === 1 ? 'person' : 'people'}
           </p>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-3">
             {filtered.map((person) => (
               <PersonCard key={person.id} person={person} />
             ))}
@@ -63,30 +65,39 @@ function PersonCard({ person }: { person: UserPeopleItem }) {
   return (
     <Link
       to={`/profile/${person.username}`}
-      className="flex flex-col h-full bg-charcoal-card rounded-2xl p-3 border border-white/8 hover:border-accent/30 transition-all"
+      className="flex flex-col h-full draft-card p-3 hover:border-accent/30 transition-colors"
     >
       <div className="flex flex-col items-center text-center">
-        <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center font-display text-accent text-lg shrink-0">
+        <div className="w-10 h-10 border-2 border-gold/40 bg-charcoal-light flex items-center justify-center font-display text-gold text-lg shrink-0">
           {person.name[0]?.toUpperCase()}
         </div>
-        <p className="font-medium text-sm mt-2 truncate w-full">{person.name}</p>
+        <p className="font-display text-sm mt-2 truncate w-full tracking-wide">{person.name}</p>
         <p className="text-muted text-xs truncate w-full">@{person.username}</p>
         {person.current_team_artist ? (
-          <span className="mt-1.5 text-[10px] font-medium bg-accent/15 text-accent px-2 py-0.5 rounded-full truncate max-w-full">
-            Team {person.current_team_artist.name}
-          </span>
+          <TeamBadge name={person.current_team_artist.name} className="mt-2 text-[9px] px-2 py-0.5" />
         ) : (
-          <span className="mt-1.5 text-[10px] text-muted">No team</span>
+          <span className="mt-2 draft-label">No team</span>
         )}
       </div>
 
       <div className="mt-2 pt-2 border-t border-white/5 flex-1">
-        <p className="text-[10px] text-muted uppercase tracking-wider mb-1">Top 5</p>
+        <p className="draft-label mb-1.5">Top 5</p>
         {person.top5_items.length > 0 ? (
-          <div className="space-y-0.5">
+          <div className="space-y-1">
             {person.top5_items.map((item) => (
-              <div key={item.position} className="flex items-center gap-1.5 text-xs leading-tight">
-                <span className="font-display text-accent text-sm w-4 shrink-0">{item.position}</span>
+              <div
+                key={item.position}
+                className={`flex items-center gap-1.5 text-xs leading-tight min-h-[22px] ${
+                  item.position === 1 ? 'border-l-2 border-l-gold pl-1.5 -ml-0.5' : ''
+                }`}
+              >
+                <span
+                  className={`font-display w-4 shrink-0 ${
+                    item.position === 1 ? 'text-gold text-base' : 'text-muted text-sm'
+                  }`}
+                >
+                  {item.position}
+                </span>
                 <span className="truncate">{item.artist.name}</span>
               </div>
             ))}

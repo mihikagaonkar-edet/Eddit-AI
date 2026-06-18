@@ -2,13 +2,20 @@ from datetime import datetime
 from typing import Literal, Optional
 from uuid import UUID
 
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, field_validator
+
+from app.utils.names import format_artist_name
 
 
 class ArtistBrief(BaseModel):
     id: UUID
     name: str
     rating: Optional[float] = None
+
+    @field_validator("name")
+    @classmethod
+    def capitalize_name(cls, v: str) -> str:
+        return format_artist_name(v)
 
     class Config:
         from_attributes = True

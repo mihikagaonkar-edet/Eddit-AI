@@ -81,19 +81,20 @@ export function VideoRecorder({ onRecorded, onCancel }: Props) {
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="bg-charcoal-card rounded-2xl p-4 border border-white/10"
+      className="draft-card p-4"
     >
-      <h3 className="font-display text-xl mb-3">Record Argument</h3>
+      <p className="draft-label mb-2">Video Argument</p>
+      <h3 className="font-display text-xl mb-3">Record Your Case</h3>
       {error && <p className="text-red-400 text-sm mb-3">{error}</p>}
 
-      <div className="relative aspect-video bg-black rounded-xl overflow-hidden mb-3">
+      <div className="relative aspect-video bg-black overflow-hidden mb-3 border border-white/10">
         {preview ? (
           <video src={preview} controls className="w-full h-full object-cover" />
         ) : (
           <video ref={videoRef} className="w-full h-full object-cover" />
         )}
         {recording && (
-          <div className="absolute top-3 right-3 flex items-center gap-2 bg-red-600/90 px-3 py-1 rounded-full text-xs font-medium">
+          <div className="absolute top-3 right-3 flex items-center gap-2 bg-red-600/90 px-3 py-1 text-xs font-medium">
             <span className="w-2 h-2 bg-white rounded-full animate-pulse" />
             {seconds}s / {MAX_SECONDS}s
           </div>
@@ -102,33 +103,24 @@ export function VideoRecorder({ onRecorded, onCancel }: Props) {
 
       <div className="flex gap-2">
         {!recording && !blob && (
-          <button
-            onClick={startRecording}
-            className="flex-1 bg-accent hover:bg-accent-glow text-white font-medium py-2.5 rounded-xl transition-colors"
-          >
+          <button onClick={startRecording} className="flex-1 btn-primary py-2.5">
             Start Recording
           </button>
         )}
         {recording && (
           <button
             onClick={stopRecording}
-            className="flex-1 bg-red-600 hover:bg-red-500 text-white font-medium py-2.5 rounded-xl transition-colors"
+            className="flex-1 bg-red-600 hover:bg-red-500 text-white font-semibold py-2.5 rounded-lg transition-colors"
           >
             Stop
           </button>
         )}
         {blob && (
-          <button
-            onClick={handleUse}
-            className="flex-1 bg-accent hover:bg-accent-glow text-white font-medium py-2.5 rounded-xl transition-colors"
-          >
+          <button onClick={handleUse} className="flex-1 btn-primary py-2.5">
             Use This Video
           </button>
         )}
-        <button
-          onClick={onCancel}
-          className="px-4 py-2.5 rounded-xl border border-white/15 text-muted hover:text-off-white transition-colors"
-        >
+        <button onClick={onCancel} className="px-4 py-2.5 btn-ghost text-sm">
           Cancel
         </button>
       </div>

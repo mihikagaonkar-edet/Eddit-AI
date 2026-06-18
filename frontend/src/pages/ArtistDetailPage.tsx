@@ -25,17 +25,18 @@ export function ArtistDetailPage() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 pt-6 space-y-8 pb-8">
-      <div className="bg-charcoal-card rounded-2xl p-6 border border-white/8 flex items-center gap-4">
+      <div className="draft-card-hero p-6 flex items-center gap-4">
         <ArtistAvatar name={artist.name} size="lg" />
         <div>
-          <h1 className="font-display text-4xl">{artist.name}</h1>
+          <p className="draft-label mb-1">Artist</p>
+          <h1 className="font-display text-4xl text-off-white">{artist.name}</h1>
           {artist.rating != null && (
-            <p className="text-gold font-display text-2xl mt-1">★ {artist.rating} Rating</p>
+            <p className="text-gold font-display text-2xl mt-1">★ {artist.rating}</p>
           )}
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-2">
         <Stat label="Rating" value={artist.rating != null ? String(artist.rating) : '—'} />
         <Stat label="Team Members" value={String(stats.team_member_count)} />
         <Stat label="Billboard Top 10" value={String(artist.billboard_top_10 ?? '—')} />
@@ -50,7 +51,7 @@ export function ArtistDetailPage() {
 
       {stats.most_common_position && (
         <Section title="Most Common Ranking Position">
-          <p className="font-display text-4xl text-accent">#{stats.most_common_position}</p>
+          <p className="font-display text-5xl text-gold">{stats.most_common_position}</p>
         </Section>
       )}
 
@@ -58,9 +59,7 @@ export function ArtistDetailPage() {
         <div className="flex gap-3 flex-wrap">
           {stats.top_supporters.map((u) => (
             <Link key={u.id} to={`/profile/${u.username}`} className="text-center">
-              <div className="w-14 h-14 rounded-full bg-accent/20 flex items-center justify-center font-display text-accent text-xl">
-                {u.name[0]}
-              </div>
+              <ArtistAvatar name={u.name} size="md" />
               <p className="text-xs mt-1">{u.name}</p>
             </Link>
           ))}
@@ -71,7 +70,7 @@ export function ArtistDetailPage() {
       <Section title="Recent Arguments">
         {stats.recent_arguments.length > 0 ? (
           stats.recent_arguments.map((a) => (
-            <div key={a.id} className="bg-charcoal-card rounded-xl p-3 mb-2 text-sm">
+            <div key={a.id} className="draft-card-row p-3 mb-1.5 text-sm">
               <span className="font-medium">{a.author.name}</span>: {a.text_content || '📹 Video argument'}
             </div>
           ))
@@ -80,10 +79,7 @@ export function ArtistDetailPage() {
         )}
       </Section>
 
-      <Link
-        to={`/teams/${artist.id}`}
-        className="block text-center bg-accent/15 border border-accent/30 rounded-xl py-3 font-medium text-accent hover:bg-accent/25 transition-colors"
-      >
+      <Link to={`/teams/${artist.id}`} className="block text-center btn-primary py-3">
         Join Team {artist.name}
       </Link>
     </div>
@@ -92,9 +88,9 @@ export function ArtistDetailPage() {
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="bg-charcoal-card rounded-xl p-4 border border-white/5">
-      <p className="text-muted text-xs">{label}</p>
-      <p className="font-display text-xl mt-1">{value}</p>
+    <div className="draft-card p-3">
+      <p className="draft-label">{label}</p>
+      <p className="font-display text-xl mt-1 text-off-white">{value}</p>
     </div>
   );
 }
@@ -102,7 +98,7 @@ function Stat({ label, value }: { label: string; value: string }) {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section>
-      <h2 className="font-display text-xl mb-3">{title}</h2>
+      <p className="draft-label mb-3">{title}</p>
       {children}
     </section>
   );

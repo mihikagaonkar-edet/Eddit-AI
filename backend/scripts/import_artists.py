@@ -19,6 +19,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from app.database import SessionLocal
 from app.models.artist import Artist
 from app.models.team import ArtistTeam
+from app.utils.names import format_artist_name
 
 # Map spreadsheet-style headers to model field names.
 COLUMN_ALIASES: dict[str, str] = {
@@ -92,7 +93,7 @@ def import_csv(path: str) -> None:
                     continue
                 artist = Artist(
                     id=uuid.uuid4(),
-                    name=str(data["name"]).strip(),
+                    name=format_artist_name(str(data["name"]).strip()),
                     billboard_top_10=parse_int(data.get("billboard_top_10")),
                     billboard_number_1=parse_int(data.get("billboard_number_1")),
                     albums_sold=parse_int(data.get("albums_sold")),

@@ -14,20 +14,20 @@ const navItems = [
 
 export function BottomNav() {
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-white/10 bg-charcoal-light/95 backdrop-blur-lg md:hidden">
-      <div className="flex justify-around py-2">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-white/8 bg-charcoal-light/98 backdrop-blur-lg md:hidden">
+      <div className="flex justify-around py-1.5">
         {navItems.map((item) => (
           <NavLink
             key={item.to}
             to={item.to}
             end={item.to === '/'}
             className={({ isActive }) =>
-              `flex flex-col items-center gap-0.5 px-3 py-1 text-xs transition-colors ${
+              `flex flex-col items-center gap-0.5 px-2 py-1 text-[10px] font-medium transition-colors ${
                 isActive ? 'text-accent' : 'text-muted'
               }`
             }
           >
-            <span className="text-lg">{item.icon}</span>
+            <span className="text-base">{item.icon}</span>
             {item.label}
           </NavLink>
         ))}
@@ -40,40 +40,42 @@ export function Sidebar() {
   const { user } = useAuth();
 
   return (
-    <aside className="hidden md:flex md:w-56 md:flex-col md:fixed md:inset-y-0 border-r border-white/10 bg-charcoal-light">
-      <div className="p-6">
-        <h1 className="font-display text-3xl text-accent tracking-wider">EDDIT</h1>
-        <p className="text-muted text-xs mt-1">Show us your Top 5.</p>
+    <aside className="hidden md:flex md:w-56 md:flex-col md:fixed md:inset-y-0 border-r border-white/8 bg-charcoal-light">
+      <div className="p-6 border-b border-white/6">
+        <h1 className="font-display text-4xl text-accent tracking-widest">EDDIT</h1>
+        <p className="draft-label mt-2 normal-case tracking-wide text-xs">
+          Who are your Top 5?
+        </p>
       </div>
-      <nav className="flex-1 px-3 space-y-1">
+      <nav className="flex-1 px-3 py-4 space-y-0.5">
         {navItems.map((item) => (
           <NavLink
             key={item.to}
             to={item.to}
             end={item.to === '/'}
             className={({ isActive }) =>
-              `flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
+              `flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
                 isActive
-                  ? 'bg-accent/15 text-accent'
+                  ? 'bg-accent/12 text-accent border-l-2 border-l-accent'
                   : 'text-muted hover:text-off-white hover:bg-white/5'
               }`
             }
           >
             <span>{item.icon}</span>
-            {item.label}
+            <span className="font-display text-sm tracking-wider">{item.label}</span>
           </NavLink>
         ))}
       </nav>
-      <div className="p-3 border-t border-white/10">
+      <div className="p-3 border-t border-white/8">
         {user ? (
           <>
-            <p className="px-4 py-2 text-xs text-muted truncate">@{user.username}</p>
+            <p className="px-4 py-1 text-xs text-muted truncate">@{user.username}</p>
             <SignOutButton />
           </>
         ) : (
           <Link
             to="/login"
-            className="block px-4 py-3 rounded-xl text-sm font-medium text-accent hover:bg-accent/10 transition-colors"
+            className="block px-4 py-2.5 rounded-lg text-sm font-semibold text-accent hover:bg-accent/10 transition-colors"
           >
             Log in
           </Link>
@@ -89,9 +91,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <Sidebar />
       <main className="md:ml-56 pb-20 md:pb-8">
         <motion.div
-          initial={{ opacity: 0, y: 8 }}
+          initial={{ opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
+          transition={{ duration: 0.25 }}
         >
           {children}
         </motion.div>

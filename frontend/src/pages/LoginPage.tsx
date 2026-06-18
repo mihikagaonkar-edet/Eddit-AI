@@ -26,36 +26,36 @@ export function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4">
-      <form onSubmit={handleSubmit} className="w-full max-w-sm space-y-4">
-        <div className="text-center mb-6">
-          <h1 className="font-display text-5xl text-accent">EDDIT</h1>
-          <p className="text-muted mt-2">Welcome back</p>
+      <form onSubmit={handleSubmit} className="w-full max-w-sm space-y-4 draft-card p-6">
+        <div className="text-center mb-2">
+          <h1 className="font-display text-5xl text-accent tracking-widest">EDDIT</h1>
+          <p className="draft-label mt-3">Welcome back</p>
         </div>
         <div>
-          <label className="text-xs text-muted uppercase tracking-wider">Username</label>
+          <label className="draft-label">Username</label>
           <input
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             required
-            className="w-full mt-1 bg-charcoal-card border border-white/10 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-accent/50"
+            className="w-full mt-1 draft-card px-4 py-2.5 text-sm focus:outline-none focus:border-accent/40"
           />
         </div>
         <div>
-          <label className="text-xs text-muted uppercase tracking-wider">Password</label>
+          <label className="draft-label">Password</label>
           <input
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="w-full mt-1 bg-charcoal-card border border-white/10 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-accent/50"
+            className="w-full mt-1 draft-card px-4 py-2.5 text-sm focus:outline-none focus:border-accent/40"
           />
         </div>
         {error && <p className="text-red-400 text-sm">{error}</p>}
-        <button type="submit" disabled={loading} className="w-full bg-accent py-3 rounded-xl font-medium disabled:opacity-50">
+        <button type="submit" disabled={loading} className="w-full btn-primary py-3 disabled:opacity-50">
           {loading ? 'Logging in...' : 'Log In'}
         </button>
         <p className="text-center text-sm text-muted">
-          New here? <Link to="/signup" className="text-accent">Create your identity</Link>
+          New here? <Link to="/signup" className="text-accent font-medium">Create your identity</Link>
         </p>
       </form>
     </div>
