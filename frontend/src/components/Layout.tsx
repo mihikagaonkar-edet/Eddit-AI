@@ -1,10 +1,13 @@
-import { NavLink } from 'react-router-dom';
+import { NavLink, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { useAuth } from '../context/AuthContext';
+import { SignOutButton } from './SignOutButton';
 
 const navItems = [
   { to: '/', label: 'Home', icon: '🏠' },
   { to: '/artists', label: 'Artists', icon: '🎤' },
   { to: '/teams', label: 'Teams', icon: '⚡' },
+  { to: '/people', label: 'People', icon: '👥' },
   { to: '/rankings', label: 'Rankings', icon: '🏆' },
   { to: '/profile', label: 'Profile', icon: '👤' },
 ];
@@ -34,6 +37,8 @@ export function BottomNav() {
 }
 
 export function Sidebar() {
+  const { user } = useAuth();
+
   return (
     <aside className="hidden md:flex md:w-56 md:flex-col md:fixed md:inset-y-0 border-r border-white/10 bg-charcoal-light">
       <div className="p-6">
@@ -59,6 +64,21 @@ export function Sidebar() {
           </NavLink>
         ))}
       </nav>
+      <div className="p-3 border-t border-white/10">
+        {user ? (
+          <>
+            <p className="px-4 py-2 text-xs text-muted truncate">@{user.username}</p>
+            <SignOutButton />
+          </>
+        ) : (
+          <Link
+            to="/login"
+            className="block px-4 py-3 rounded-xl text-sm font-medium text-accent hover:bg-accent/10 transition-colors"
+          >
+            Log in
+          </Link>
+        )}
+      </div>
     </aside>
   );
 }

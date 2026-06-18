@@ -17,7 +17,7 @@ export function SignupPage() {
   const [teamId, setTeamId] = useState<string | null>(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { register } = useAuth();
+  const { register, refreshUser } = useAuth();
   const navigate = useNavigate();
 
   const { data: artists = [] } = useQuery({
@@ -69,6 +69,7 @@ export function SignupPage() {
     setLoading(true);
     try {
       await api.joinTeam(teamId);
+      await refreshUser();
       navigate('/');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to join team');

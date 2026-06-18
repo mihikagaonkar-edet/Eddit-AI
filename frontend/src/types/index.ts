@@ -12,6 +12,20 @@ export interface Artist {
   spotify_monthly_listeners?: number | null;
 }
 
+export interface Top5ItemPeople {
+  position: number;
+  artist: Artist;
+}
+
+export interface UserPeopleItem {
+  id: string;
+  name: string;
+  username: string;
+  city?: string | null;
+  current_team_artist?: Artist | null;
+  top5_items: Top5ItemPeople[];
+}
+
 export interface User {
   id: string;
   name: string;

@@ -8,9 +8,19 @@ from thefuzz import fuzz, process
 from app.auth import get_current_user, get_optional_user
 from app.database import get_db
 from app.models.artist import Artist
+from app.models.top5 import Top5Item, Top5List
 from app.models.team import ArtistTeam
 from app.models.user import User
-from app.schemas import ArtistBrief, ArtistDetail, SearchResults, TeamJoinRequest, UserBrief, UserProfile
+from app.schemas import (
+    ArtistBrief,
+    ArtistDetail,
+    SearchResults,
+    TeamJoinRequest,
+    Top5ItemPeople,
+    UserBrief,
+    UserPeopleItem,
+    UserProfile,
+)
 from app.services import artist_to_brief, artist_to_detail, ensure_artist_teams, user_to_brief
 
 router = APIRouter(prefix="/api", tags=["users & artists"])
@@ -51,6 +61,39 @@ def join_team(
     current_user.current_team_artist_id = artist.id
     db.commit()
     return {"message": f"Joined Team {artist.name}"}
+
+
+@router.get("/people", response_model=list[UserPeopleItem])
+def list_people(db: Session = Depends(get_db)):
+    users = (
+        db.query(User)
+        .options(
+            joinedload(User.current_team_artist),
+            joinedload(User.top5_list).joinedload(Top5List.items).joinedload(Top5Item.artist),
+        )
+        .order_by(User.name)
+        .all()
+    )
+    results = []
+    for user in users:
+        team = artist_to_brief(user.current_team_artist) if user.current_team_artist else None
+        top5_items = []
+        if user.top5_list and user.top5_list.items:
+            for item in sorted(user.top5_list.items, key=lambda i: i.position):
+                top5_items.append(
+                    Top5ItemPeople(position=item.position, artist=artist_to_brief(item.artist))
+                )
+        results.append(
+            UserPeopleItem(
+                id=user.id,
+                name=user.name,
+                username=user.username,
+                city=user.city,
+                current_team_artist=team,
+                top5_items=top5_items,
+            )
+        )
+    return results
 
 
 @router.get("/artists", response_model=list[ArtistDetail])

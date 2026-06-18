@@ -8,7 +8,7 @@ import { ArtistAvatar } from '../components/ArtistAvatar';
 
 export function TeamDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
   const queryClient = useQueryClient();
 
   const { data: team, isLoading } = useQuery({
@@ -19,9 +19,10 @@ export function TeamDetailPage() {
 
   const joinMutation = useMutation({
     mutationFn: () => api.joinTeam(id!),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['team', id] });
-      queryClient.invalidateQueries({ queryKey: ['auth'] });
+    onSuccess: async () => {
+      await refreshUser();
+      queryClient.invalidateQueries({ queryKey: ['team'] });
+      queryClient.invalidateQueries({ queryKey: ['user'] });
     },
   });
 
@@ -48,7 +49,7 @@ export function TeamDetailPage() {
         <p className="text-muted text-sm">Total Members</p>
       </div>
 
-      {!isMember && user && (
+      {user && !isMember && (
         <motion.button
           whileTap={{ scale: 0.97 }}
           onClick={() => joinMutation.mutate()}
@@ -58,8 +59,12 @@ export function TeamDetailPage() {
           {joinMutation.isPending ? 'Joining...' : `Join Team ${team.artist.name}`}
         </motion.button>
       )}
-      {isMember && (
-        <p className="text-center text-accent font-medium">You're on this team ⚡</p>
+      {user && isMember && (
+        <div className="flex justify-center">
+          <span className="inline-flex items-center gap-2 bg-accent/15 border border-accent/40 text-accent font-medium text-sm px-4 py-2 rounded-full">
+            You're on Team {team.artist.name} ⚡
+          </span>
+        </div>
       )}
 
       <Section title="Newest Members">

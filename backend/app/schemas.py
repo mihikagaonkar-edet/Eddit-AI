@@ -41,6 +41,20 @@ class UserProfile(UserBrief):
     created_at: datetime
 
 
+class Top5ItemPeople(BaseModel):
+    position: int
+    artist: ArtistBrief
+
+
+class UserPeopleItem(BaseModel):
+    id: UUID
+    name: str
+    username: str
+    city: Optional[str] = None
+    current_team_artist: Optional[ArtistBrief] = None
+    top5_items: list[Top5ItemPeople] = []
+
+
 class RegisterRequest(BaseModel):
     name: str = Field(min_length=1, max_length=255)
     username: str = Field(min_length=3, max_length=50, pattern=r"^[a-zA-Z0-9_]+$")

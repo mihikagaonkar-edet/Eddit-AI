@@ -5,6 +5,7 @@ import { api } from '../api/client';
 import { Top5Display } from '../components/Top5Display';
 import { Top5Picker } from '../components/Top5Picker';
 import { ArgumentThread } from '../components/ArgumentThread';
+import { SignOutButton } from '../components/SignOutButton';
 import { useAuth } from '../context/AuthContext';
 import type { Artist, Top5Item } from '../types';
 
@@ -57,12 +58,15 @@ export function ProfilePage() {
               {profile.city && <p className="text-sm text-muted mt-1">📍 {profile.city}</p>}
             </div>
             {isOwnProfile && currentUser && (
-              <button
-                onClick={() => setEditing(!editing)}
-                className="text-sm text-accent border border-accent/30 px-3 py-1.5 rounded-lg hover:bg-accent/10"
-              >
-                {editing ? 'Cancel' : 'Edit Top 5'}
-              </button>
+              <div className="flex flex-col gap-2 items-end">
+                <button
+                  onClick={() => setEditing(!editing)}
+                  className="text-sm text-accent border border-accent/30 px-3 py-1.5 rounded-lg hover:bg-accent/10"
+                >
+                  {editing ? 'Cancel' : 'Edit Top 5'}
+                </button>
+                <SignOutButton compact className="md:hidden" />
+              </div>
             )}
           </div>
           {profile.current_team_artist && (

@@ -8,6 +8,7 @@ import { ArtistDetailPage } from './pages/ArtistDetailPage';
 import { TeamsPage } from './pages/TeamsPage';
 import { TeamDetailPage } from './pages/TeamDetailPage';
 import { RankingsPage } from './pages/RankingsPage';
+import { PeoplePage } from './pages/PeoplePage';
 import { ProfilePage } from './pages/ProfilePage';
 import { SignupPage } from './pages/SignupPage';
 import { LoginPage } from './pages/LoginPage';
@@ -31,6 +32,7 @@ function AppRoutes() {
               <Route path="/artists/:id" element={<ArtistDetailPage />} />
               <Route path="/teams" element={<TeamsPage />} />
               <Route path="/teams/:id" element={<TeamDetailPage />} />
+              <Route path="/people" element={<PeoplePage />} />
               <Route path="/rankings" element={<RankingsPage />} />
               <Route path="/profile" element={<ProfilePage />} />
               <Route path="/profile/:username" element={<ProfilePage />} />

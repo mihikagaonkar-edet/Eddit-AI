@@ -44,6 +44,8 @@ export const api = {
   getHome: () => request<import('../types').HomeFeed>('/api/home'),
   getRankings: () => request<import('../types').Rankings>('/api/rankings'),
 
+  getPeople: () => request<import('../types').UserPeopleItem[]>('/api/people'),
+
   getArtists: (skip = 0, limit = 50) =>
     request<import('../types').Artist[]>(`/api/artists?skip=${skip}&limit=${limit}`),
 
