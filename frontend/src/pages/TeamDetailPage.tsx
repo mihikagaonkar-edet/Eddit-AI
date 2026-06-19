@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import { api } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { ArtistAvatar } from '../components/ArtistAvatar';
+import { TeamPatch } from '../components/TeamPatch';
 import { TeamBadge } from '../components/TeamBadge';
 
 export function TeamDetailPage() {
@@ -40,7 +41,7 @@ export function TeamDetailPage() {
           animate={{ scale: 1, opacity: 1 }}
           className="flex justify-center"
         >
-          <ArtistAvatar name={team.artist.name} size="lg" />
+          <TeamPatch name={team.artist.name} size="lg" />
         </motion.div>
         <p className="draft-label mt-4">Community</p>
         <h1 className="font-display text-4xl text-accent mt-1">Team {team.artist.name}</h1>

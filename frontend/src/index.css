@@ -8,6 +8,7 @@
   --color-charcoal-light: #1e1b24;
   --color-charcoal-card: #252029;
   --color-off-white: #f5f0e8;
+  --color-warm-white: #e8e0d4;
   --color-muted: #9a939e;
   --color-accent: #ff6b4a;
   --color-accent-glow: #ff8566;
@@ -62,6 +63,27 @@ body {
 .table-scroll-wrap::-webkit-scrollbar-thumb {
   background: #3d3844;
   border-radius: 3px;
+}
+
+.team-patch {
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.35));
+}
+
+.team-patch-team-label {
+  font-family: var(--font-display);
+  font-size: 8px;
+  letter-spacing: 0.28em;
+}
+
+.team-patch-name {
+  font-family: var(--font-display);
+  font-size: 13px;
+  letter-spacing: 0.08em;
+}
+
+.team-patch-name-sub {
+  font-size: 10px;
+  letter-spacing: 0.06em;
 }
 
 .draft-card {

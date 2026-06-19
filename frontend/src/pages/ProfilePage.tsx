@@ -6,7 +6,8 @@ import { Top5Display } from '../components/Top5Display';
 import { Top5Picker } from '../components/Top5Picker';
 import { ArgumentThread } from '../components/ArgumentThread';
 import { SignOutButton } from '../components/SignOutButton';
-import { ArtistAvatar } from '../components/ArtistAvatar';
+import { ShareProfileButton } from '../components/ShareProfileButton';
+import { TeamPatch } from '../components/TeamPatch';
 import { useAuth } from '../context/AuthContext';
 import { formatArtistName } from '../utils/formatArtistName';
 import type { Artist, Top5Item } from '../types';
@@ -52,40 +53,35 @@ export function ProfilePage() {
   return (
     <div className="max-w-2xl mx-auto px-4 pt-6 space-y-8 pb-8">
       {profile && (
-        <header className="draft-card p-4 sm:p-5 border-white/8">
-          <div className="flex items-start gap-4">
+        <header className="draft-card p-5 sm:p-6 border-white/8">
+          <div className="flex items-center gap-8 sm:gap-10">
             {profile.current_team_artist && (
               <Link
                 to={`/teams/${profile.current_team_artist.id}`}
-                className="shrink-0 border-2 border-accent/30 bg-charcoal-light p-1 shadow-[3px_3px_0_rgba(255,107,74,0.2)]"
+                className="shrink-0 hover:scale-[1.02] transition-transform"
               >
-                <ArtistAvatar name={profile.current_team_artist.name} size="xl" />
+                <TeamPatch name={profile.current_team_artist.name} size="lg" />
               </Link>
             )}
 
-            <div className="flex-1 min-w-0">
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <p className="draft-label mb-1">Fan Identity</p>
-                  <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                    <h1 className="font-serif text-2xl sm:text-3xl text-off-white leading-tight">
-                      {profile.name}
-                    </h1>
-                    {profile.current_team_artist && (
-                      <Link
-                        to={`/teams/${profile.current_team_artist.id}`}
-                        className="font-serif text-3xl sm:text-4xl lg:text-5xl text-accent hover:text-accent-glow transition-colors leading-none tracking-wide"
-                      >
-                        Team {formatArtistName(profile.current_team_artist.name)}
-                      </Link>
-                    )}
-                  </div>
-                  <p className="text-muted text-sm mt-2">@{profile.username}</p>
-                  {profile.city && <p className="text-muted text-xs mt-1">📍 {profile.city}</p>}
-                </div>
+            <div className="flex-1 min-w-0 flex gap-4">
+              <div className="min-w-0 flex-1">
+                <p className="draft-label mb-1">Fan Identity</p>
+                {profile.current_team_artist && (
+                  <Link
+                    to={`/teams/${profile.current_team_artist.id}`}
+                    className="font-serif text-3xl sm:text-4xl lg:text-5xl text-warm-white hover:text-off-white transition-colors leading-none tracking-wide block"
+                  >
+                    Team {formatArtistName(profile.current_team_artist.name)}
+                  </Link>
+                )}
+                <p className="text-off-white text-base sm:text-lg mt-2">@{profile.username}</p>
+                {profile.city && <p className="text-muted text-xs mt-1">📍 {profile.city}</p>}
+              </div>
 
+              <div className="flex flex-col justify-between items-end shrink-0">
                 {isOwnProfile && currentUser && (
-                  <div className="flex flex-col gap-2 items-end shrink-0">
+                  <div className="flex flex-col gap-2 items-end">
                     <button
                       onClick={() => setEditing(!editing)}
                       className="text-xs font-semibold text-accent border-2 border-accent/40 px-3 py-1.5 rounded-lg hover:bg-accent/10"
@@ -95,6 +91,12 @@ export function ProfilePage() {
                     <SignOutButton compact className="md:hidden" />
                   </div>
                 )}
+
+                <ShareProfileButton
+                  username={profile.username}
+                  top5Items={top5?.items ?? []}
+                  teamName={profile.current_team_artist?.name}
+                />
               </div>
             </div>
           </div>

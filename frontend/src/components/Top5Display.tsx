@@ -125,10 +125,10 @@ export function Top5Display({ items, editable, onVote, onArgue, showVotes = true
                 <div className={`flex-1 min-w-0 ${isHero ? 'py-0.5' : 'py-1'}`}>
                   <Link
                     to={`/artists/${item.artist.id}`}
-                    className={`font-serif hover:opacity-80 transition-opacity truncate block ${
+                    className={`font-serif font-semibold hover:opacity-80 transition-opacity truncate block ${
                       isHero
-                        ? 'text-xl sm:text-2xl text-gold'
-                        : 'text-lg sm:text-xl text-off-white'
+                        ? 'text-2xl sm:text-3xl lg:text-4xl text-gold'
+                        : 'text-xl sm:text-2xl lg:text-3xl text-warm-white'
                     }`}
                   >
                     {item.artist.name}
