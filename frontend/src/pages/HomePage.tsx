@@ -155,8 +155,8 @@ export function HomePage() {
       {isLoading && <p className="text-muted">Loading artists...</p>}
 
       {!isLoading && (
-        <div className="overflow-x-auto draft-card">
-          <table className="w-full text-sm">
+        <div className="table-scroll-wrap">
+          <table className="min-w-max w-full text-sm">
             <thead>
               <tr className="border-b border-white/10">
                 {COLUMNS.map((col) => (

@@ -46,6 +46,24 @@ body {
   @apply text-[9px] font-display tracking-[0.15em] uppercase;
 }
 
+.table-scroll-wrap {
+  @apply bg-charcoal-card border border-white/6 rounded-lg overflow-x-auto overscroll-x-contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.table-scroll-wrap::-webkit-scrollbar {
+  height: 6px;
+}
+
+.table-scroll-wrap::-webkit-scrollbar-track {
+  background: var(--color-charcoal-card);
+}
+
+.table-scroll-wrap::-webkit-scrollbar-thumb {
+  background: #3d3844;
+  border-radius: 3px;
+}
+
 .draft-card {
   @apply bg-charcoal-card border border-white/6 rounded-lg overflow-hidden;
 }
