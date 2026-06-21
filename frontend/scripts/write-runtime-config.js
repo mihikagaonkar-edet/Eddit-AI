@@ -1,7 +1,11 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-const apiUrl = (process.env.VITE_API_URL || process.env.API_URL || '').replace(/\/$/, '');
+const raw = process.env.VITE_API_URL || process.env.API_URL || '';
+let apiUrl = raw.replace(/\/$/, '');
+if (apiUrl.endsWith('/api')) {
+  apiUrl = apiUrl.slice(0, -4);
+}
 const outPath = path.join('dist', 'runtime-config.js');
 const contents = `window.__EDDIT_CONFIG__=${JSON.stringify({ apiUrl })};\n`;
 

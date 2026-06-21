@@ -33,6 +33,17 @@ app.include_router(votes.router)
 app.include_router(feed.router)
 
 
+@app.get("/")
+def root():
+    return {
+        "service": "Eddit AI API",
+        "health": "/api/health",
+        "docs": "/docs",
+        "artists": "/api/artists",
+    }
+
+
+@app.get("/health")
 @app.get("/api/health")
 def health():
     return {"status": "ok"}

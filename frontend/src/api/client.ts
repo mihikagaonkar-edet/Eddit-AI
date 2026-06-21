@@ -3,7 +3,12 @@ import { formatArtistName } from '../utils/formatArtistName';
 function getApiBase(): string {
   const runtime = typeof window !== 'undefined' ? window.__EDDIT_CONFIG__?.apiUrl : undefined;
   const built = import.meta.env.VITE_API_URL ?? '';
-  return (runtime || built || '').replace(/\/$/, '');
+  let base = (runtime || built || '').replace(/\/$/, '');
+  // Common mistake: VITE_API_URL=https://backend.up.railway.app/api
+  if (base.endsWith('/api')) {
+    base = base.slice(0, -4);
+  }
+  return base;
 }
 
 async function parseJsonResponse<T>(res: Response): Promise<T> {
