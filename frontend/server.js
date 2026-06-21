@@ -31,11 +31,18 @@ const proxy = createProxyMiddleware({
 
 const app = express();
 
+app.get('/_eddit/config', (_req, res) => {
+  res.json({
+    apiUrl: backendUrl,
+    note: 'Backend URL used by the server proxy. The browser calls /api on this same host.',
+  });
+});
+
 app.use('/api', proxy);
 app.use('/uploads', proxy);
 app.use(express.static(distDir));
 
-app.get(/^(?!\/api|\/uploads).*/, (_req, res) => {
+app.get(/^(?!\/api|\/uploads|\/_eddit).*/, (_req, res) => {
   res.sendFile(path.join(distDir, 'index.html'));
 });
 

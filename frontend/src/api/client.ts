@@ -3,8 +3,7 @@ import { formatArtistName } from '../utils/formatArtistName';
 /** Empty string = same-origin /api (Vite dev proxy or production server.js proxy). */
 function getApiBase(): string {
   const built = import.meta.env.VITE_API_URL ?? '';
-  const runtime = typeof window !== 'undefined' ? window.__EDDIT_CONFIG__?.apiUrl : undefined;
-  let base = (built || runtime || '').replace(/\/$/, '');
+  let base = built.replace(/\/$/, '');
   if (base.endsWith('/api')) {
     base = base.slice(0, -4);
   }
