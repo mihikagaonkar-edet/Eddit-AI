@@ -1,10 +1,10 @@
 import { formatArtistName } from '../utils/formatArtistName';
 
+/** Empty string = same-origin /api (Vite dev proxy or production server.js proxy). */
 function getApiBase(): string {
-  const runtime = typeof window !== 'undefined' ? window.__EDDIT_CONFIG__?.apiUrl : undefined;
   const built = import.meta.env.VITE_API_URL ?? '';
-  let base = (runtime || built || '').replace(/\/$/, '');
-  // Common mistake: VITE_API_URL=https://backend.up.railway.app/api
+  const runtime = typeof window !== 'undefined' ? window.__EDDIT_CONFIG__?.apiUrl : undefined;
+  let base = (built || runtime || '').replace(/\/$/, '');
   if (base.endsWith('/api')) {
     base = base.slice(0, -4);
   }
@@ -17,13 +17,9 @@ async function parseJsonResponse<T>(res: Response): Promise<T> {
 
   if (!contentType.includes('application/json')) {
     if (text.trimStart().startsWith('<!')) {
-      const base = getApiBase();
-      if (!base) {
-        throw new Error(
-          'API URL is not configured. Set VITE_API_URL on the Railway frontend service to your backend public URL.'
-        );
-      }
-      throw new Error('Server returned a web page instead of JSON. Check that VITE_API_URL points to your backend public URL.');
+      throw new Error(
+        'Server returned HTML instead of JSON. The /api proxy may be misconfigured — check VITE_API_URL on the Railway frontend service.'
+      );
     }
     throw new Error(text || res.statusText || 'Unexpected response from server');
   }
@@ -75,11 +71,7 @@ function getToken(): string | null {
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const base = getApiBase();
-  if (!base) {
-    throw new Error(
-      'API URL is not configured. Set VITE_API_URL on the Railway frontend service, then redeploy.'
-    );
-  }
+  const url = `${base}${path}`;
 
   const token = getToken();
   const headers: Record<string, string> = {
@@ -90,9 +82,9 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
     headers['Content-Type'] = headers['Content-Type'] || 'application/json';
   }
 
-  const res = await fetch(`${base}${path}`, { ...options, headers }).catch((e) => {
+  const res = await fetch(url, { ...options, headers }).catch((e) => {
     throw new Error(
-      `Could not reach the API at ${base}. Check VITE_API_URL (frontend) and that the backend is running. (${e instanceof Error ? e.message : 'network error'})`
+      `Could not reach the API (${url}). ${e instanceof Error ? e.message : 'network error'}`
     );
   });
   if (!res.ok) {
@@ -113,7 +105,8 @@ export const api = {
     const form = new URLSearchParams();
     form.append('username', username);
     form.append('password', password);
-    const res = await fetch(`${getApiBase()}/api/auth/login`, {
+    const base = getApiBase();
+    const res = await fetch(`${base}/api/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: form,
@@ -180,7 +173,8 @@ export const api = {
     form.append('file', blob, 'argument.webm');
     form.append('duration_seconds', String(duration_seconds));
     const token = getToken();
-    const res = await fetch(`${getApiBase()}/api/videos/upload`, {
+    const base = getApiBase();
+    const res = await fetch(`${base}/api/videos/upload`, {
       method: 'POST',
       headers: token ? { Authorization: `Bearer ${token}` } : {},
       body: form,
@@ -197,7 +191,8 @@ export const api = {
 };
 
 export function getApiBaseUrl(): string {
-  return getApiBase();
+  const base = getApiBase();
+  return base || '(same-origin /api proxy)';
 }
 
 export function setToken(token: string) {

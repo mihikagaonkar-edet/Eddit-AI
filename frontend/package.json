@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "start": "node scripts/write-runtime-config.js && serve dist -s -l tcp://0.0.0.0:$PORT",
+    "start": "node server.js",
     "lint": "eslint .",
     "preview": "vite preview"
   },
@@ -19,7 +19,8 @@
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "react-router-dom": "^7.18.0",
-    "serve": "^14.2.4"
+    "express": "^4.21.2",
+    "http-proxy-middleware": "^3.0.5"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
