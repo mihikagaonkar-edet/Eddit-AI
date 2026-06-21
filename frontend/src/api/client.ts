@@ -1,6 +1,34 @@
 import { formatArtistName } from '../utils/formatArtistName';
 
-const API_BASE = (import.meta.env.VITE_API_URL ?? '').replace(/\/$/, '');
+function getApiBase(): string {
+  const runtime = typeof window !== 'undefined' ? window.__EDDIT_CONFIG__?.apiUrl : undefined;
+  const built = import.meta.env.VITE_API_URL ?? '';
+  return (runtime || built || '').replace(/\/$/, '');
+}
+
+async function parseJsonResponse<T>(res: Response): Promise<T> {
+  const text = await res.text();
+  const contentType = res.headers.get('content-type') ?? '';
+
+  if (!contentType.includes('application/json')) {
+    if (text.trimStart().startsWith('<!')) {
+      const base = getApiBase();
+      if (!base) {
+        throw new Error(
+          'API URL is not configured. Set VITE_API_URL on the Railway frontend service to your backend public URL.'
+        );
+      }
+      throw new Error('Server returned a web page instead of JSON. Check that VITE_API_URL points to your backend public URL.');
+    }
+    throw new Error(text || res.statusText || 'Unexpected response from server');
+  }
+
+  try {
+    return JSON.parse(text) as T;
+  } catch {
+    throw new Error('Invalid JSON response from server');
+  }
+}
 
 function isArtistRecord(record: Record<string, unknown>): boolean {
   if (typeof record.name !== 'string') return false;
@@ -50,12 +78,14 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
     headers['Content-Type'] = headers['Content-Type'] || 'application/json';
   }
 
-  const res = await fetch(`${API_BASE}${path}`, { ...options, headers });
+  const res = await fetch(`${getApiBase()}${path}`, { ...options, headers });
   if (!res.ok) {
-    const err = await res.json().catch(() => ({ detail: res.statusText }));
+    const err = await parseJsonResponse<{ detail?: string }>(res).catch((e) => ({
+      detail: e instanceof Error ? e.message : res.statusText,
+    }));
     throw new Error(err.detail || 'Request failed');
   }
-  const data = await res.json();
+  const data = await parseJsonResponse<T>(res);
   return normalizeArtistNames(data) as T;
 }
 
@@ -67,13 +97,13 @@ export const api = {
     const form = new URLSearchParams();
     form.append('username', username);
     form.append('password', password);
-    const res = await fetch(`${API_BASE}/api/auth/login`, {
+    const res = await fetch(`${getApiBase()}/api/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: form,
     });
     if (!res.ok) throw new Error('Invalid credentials');
-    return res.json() as Promise<{ access_token: string }>;
+    return parseJsonResponse<{ access_token: string }>(res);
   },
 
   me: () => request<import('../types').User>('/api/auth/me'),
@@ -134,13 +164,13 @@ export const api = {
     form.append('file', blob, 'argument.webm');
     form.append('duration_seconds', String(duration_seconds));
     const token = getToken();
-    const res = await fetch(`${API_BASE}/api/videos/upload`, {
+    const res = await fetch(`${getApiBase()}/api/videos/upload`, {
       method: 'POST',
       headers: token ? { Authorization: `Bearer ${token}` } : {},
       body: form,
     });
     if (!res.ok) throw new Error('Upload failed');
-    return res.json() as Promise<import('../types').Video>;
+    return parseJsonResponse<import('../types').Video>(res);
   },
 
   vote: (top5_item_id: string, vote_type: 'like' | 'dislike') =>
@@ -160,5 +190,5 @@ export function clearToken() {
 
 export function mediaUrl(path: string) {
   if (path.startsWith('http')) return path;
-  return `${API_BASE}${path}`;
+  return `${getApiBase()}${path}`;
 }

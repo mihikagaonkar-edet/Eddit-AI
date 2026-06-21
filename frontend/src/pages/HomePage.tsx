@@ -79,7 +79,7 @@ export function HomePage() {
   const [sortField, setSortField] = useState<SortField>('rating');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
 
-  const { data: artists = [], isLoading } = useQuery({
+  const { data: artists = [], isLoading, isError, error } = useQuery({
     queryKey: ['artists', 'all'],
     queryFn: () => api.getArtists(0, 1000),
   });
@@ -154,7 +154,13 @@ export function HomePage() {
 
       {isLoading && <p className="text-muted">Loading artists...</p>}
 
-      {!isLoading && (
+      {isError && (
+        <p className="text-red-400 text-sm">
+          Could not load artists: {error instanceof Error ? error.message : 'Request failed'}
+        </p>
+      )}
+
+      {!isLoading && !isError && (
         <div className="table-scroll-wrap">
           <table className="min-w-max w-full text-sm">
             <thead>

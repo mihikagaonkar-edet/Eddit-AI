@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "start": "serve dist -s -l tcp://0.0.0.0:$PORT",
+    "start": "node scripts/write-runtime-config.js && serve dist -s -l tcp://0.0.0.0:$PORT",
     "lint": "eslint .",
     "preview": "vite preview"
   },
