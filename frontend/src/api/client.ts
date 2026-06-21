@@ -1,13 +1,8 @@
 import { formatArtistName } from '../utils/formatArtistName';
 
-/** Empty string = same-origin /api (Vite dev proxy or production server.js proxy). */
+/** Always same-origin /api — Vite dev proxy or production server.js proxy. */
 function getApiBase(): string {
-  const built = import.meta.env.VITE_API_URL ?? '';
-  let base = built.replace(/\/$/, '');
-  if (base.endsWith('/api')) {
-    base = base.slice(0, -4);
-  }
-  return base;
+  return '';
 }
 
 async function parseJsonResponse<T>(res: Response): Promise<T> {
@@ -17,7 +12,7 @@ async function parseJsonResponse<T>(res: Response): Promise<T> {
   if (!contentType.includes('application/json')) {
     if (text.trimStart().startsWith('<!')) {
       throw new Error(
-        'Server returned HTML instead of JSON. The /api proxy may be misconfigured — check VITE_API_URL on the Railway frontend service.'
+        'Server returned HTML instead of JSON. The /api proxy is not reaching the backend — on Railway, set API_URL on the frontend service to your backend public URL (e.g. https://xxx.up.railway.app).'
       );
     }
     throw new Error(text || res.statusText || 'Unexpected response from server');

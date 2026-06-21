@@ -8,7 +8,8 @@ const distDir = path.join(__dirname, 'dist');
 const port = Number(process.env.PORT || 4173);
 
 function resolveBackendUrl() {
-  const raw = process.env.VITE_API_URL || process.env.API_URL || '';
+  // Prefer API_URL — unlike VITE_* vars it is not baked into the browser bundle at build time.
+  const raw = process.env.API_URL || process.env.VITE_API_URL || '';
   let url = raw.trim().replace(/\/$/, '');
   if (url.endsWith('/api')) {
     url = url.slice(0, -4);
@@ -19,7 +20,7 @@ function resolveBackendUrl() {
 const backendUrl = resolveBackendUrl();
 if (!backendUrl) {
   console.error(
-    'Missing VITE_API_URL. Set it on the Railway frontend service to your backend public URL (e.g. https://xxx.up.railway.app).'
+    'Missing API_URL. Set it on the Railway frontend service to your backend public URL (e.g. https://xxx.up.railway.app).'
   );
   process.exit(1);
 }

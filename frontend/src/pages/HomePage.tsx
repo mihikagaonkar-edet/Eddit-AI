@@ -204,7 +204,7 @@ export function HomePage() {
                     <p>No artists found</p>
                     {artists.length === 0 && (
                       <p className="text-xs text-red-400/90">
-                        API: {getApiBaseUrl() || '(not configured — set VITE_API_URL on Railway frontend)'}
+                        API: {getApiBaseUrl()} — if requests fail, set API_URL on the Railway frontend service
                       </p>
                     )}
                   </td>
