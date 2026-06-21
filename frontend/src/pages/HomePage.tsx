@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { api } from '../api/client';
+import { api, getApiBaseUrl } from '../api/client';
 import type { Artist } from '../types';
 
 type SortField = keyof Pick<
@@ -200,8 +200,13 @@ export function HomePage() {
               ))}
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={COLUMNS.length} className="px-3 py-8 text-center text-muted">
-                    No artists found
+                  <td colSpan={COLUMNS.length} className="px-3 py-8 text-center text-muted space-y-2">
+                    <p>No artists found</p>
+                    {artists.length === 0 && (
+                      <p className="text-xs text-red-400/90">
+                        API: {getApiBaseUrl() || '(not configured — set VITE_API_URL on Railway frontend)'}
+                      </p>
+                    )}
                   </td>
                 </tr>
               )}

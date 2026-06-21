@@ -11,6 +11,7 @@ class Settings(BaseSettings):
     access_token_expire_minutes: int = 10080
     upload_dir: str = "uploads"
     cors_origins: str = "http://localhost:5173"
+    cors_allow_railway: bool = True
 
     @field_validator("database_url", mode="before")
     @classmethod

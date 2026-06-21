@@ -9,14 +9,18 @@ from app.routers import arguments, auth, feed, teams, top5, users, videos, votes
 
 app = FastAPI(title="Eddit AI", version="0.1.0")
 
-origins = [o.strip() for o in settings.cors_origins.split(",")]
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+origins = [o.strip().rstrip("/") for o in settings.cors_origins.split(",") if o.strip()]
+cors_kwargs: dict = {
+    "allow_origins": origins,
+    "allow_credentials": True,
+    "allow_methods": ["*"],
+    "allow_headers": ["*"],
+}
+if settings.cors_allow_railway:
+    # Avoid CORS mismatches when frontend/backend Railway URLs differ slightly from CORS_ORIGINS.
+    cors_kwargs["allow_origin_regex"] = r"https://.*\.up\.railway\.app"
+
+app.add_middleware(CORSMiddleware, **cors_kwargs)
 
 upload_path = Path(settings.upload_dir)
 upload_path.mkdir(parents=True, exist_ok=True)

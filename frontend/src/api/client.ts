@@ -74,6 +74,13 @@ function getToken(): string | null {
 }
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
+  const base = getApiBase();
+  if (!base) {
+    throw new Error(
+      'API URL is not configured. Set VITE_API_URL on the Railway frontend service, then redeploy.'
+    );
+  }
+
   const token = getToken();
   const headers: Record<string, string> = {
     ...(options.headers as Record<string, string>),
@@ -83,7 +90,11 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
     headers['Content-Type'] = headers['Content-Type'] || 'application/json';
   }
 
-  const res = await fetch(`${getApiBase()}${path}`, { ...options, headers });
+  const res = await fetch(`${base}${path}`, { ...options, headers }).catch((e) => {
+    throw new Error(
+      `Could not reach the API at ${base}. Check VITE_API_URL (frontend) and that the backend is running. (${e instanceof Error ? e.message : 'network error'})`
+    );
+  });
   if (!res.ok) {
     const err = await parseJsonResponse<{ detail?: string }>(res).catch((e) => ({
       detail: e instanceof Error ? e.message : res.statusText,
@@ -184,6 +195,10 @@ export const api = {
       body: JSON.stringify({ top5_item_id, vote_type }),
     }),
 };
+
+export function getApiBaseUrl(): string {
+  return getApiBase();
+}
 
 export function setToken(token: string) {
   localStorage.setItem('eddit_token', token);
