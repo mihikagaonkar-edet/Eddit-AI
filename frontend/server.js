@@ -14,6 +14,20 @@ function resolveBackendUrl() {
   if (url.endsWith('/api')) {
     url = url.slice(0, -4);
   }
+  if (!url) return '';
+
+  if (!/^https?:\/\//i.test(url)) {
+    const useHttp = /^(localhost|127\.0\.0\.1)(:\d+)?(\/|$)/i.test(url);
+    url = `${useHttp ? 'http' : 'https'}://${url}`;
+  }
+
+  try {
+    new URL(url);
+  } catch {
+    console.error(`Invalid API_URL: ${raw}`);
+    process.exit(1);
+  }
+
   return url;
 }
 
@@ -28,6 +42,17 @@ if (!backendUrl) {
 const proxy = createProxyMiddleware({
   target: backendUrl,
   changeOrigin: true,
+  // Match full paths — do not mount at app.use('/api', ...) or Express strips the prefix.
+  pathFilter: ['/api/**', '/uploads/**'],
+  on: {
+    error: (err, _req, res) => {
+      console.error(`Proxy error (${backendUrl}):`, err.message);
+      if (res && !res.headersSent) {
+        res.writeHead(502, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ detail: 'Backend unavailable' }));
+      }
+    },
+  },
 });
 
 const app = express();
@@ -39,8 +64,7 @@ app.get('/_eddit/config', (_req, res) => {
   });
 });
 
-app.use('/api', proxy);
-app.use('/uploads', proxy);
+app.use(proxy);
 app.use(express.static(distDir));
 
 app.get(/^(?!\/api|\/uploads|\/_eddit).*/, (_req, res) => {
