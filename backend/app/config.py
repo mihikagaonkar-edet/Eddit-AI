@@ -22,6 +22,9 @@ class Settings(BaseSettings):
         if not url:
             raise ValueError("DATABASE_URL is empty")
 
+        # Common manual typo on Railway: postgresql+pyscopg://
+        url = url.replace("postgresql+pyscopg://", "postgresql+psycopg://", 1)
+
         if url.startswith("postgresql+psycopg://"):
             return url
 
