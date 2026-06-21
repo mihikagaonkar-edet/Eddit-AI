@@ -1,6 +1,6 @@
 import { formatArtistName } from '../utils/formatArtistName';
 
-const API_BASE = '';
+const API_BASE = (import.meta.env.VITE_API_URL ?? '').replace(/\/$/, '');
 
 function isArtistRecord(record: Record<string, unknown>): boolean {
   if (typeof record.name !== 'string') return false;
@@ -160,5 +160,5 @@ export function clearToken() {
 
 export function mediaUrl(path: string) {
   if (path.startsWith('http')) return path;
-  return path;
+  return `${API_BASE}${path}`;
 }
