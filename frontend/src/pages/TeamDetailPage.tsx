@@ -44,13 +44,13 @@ export function TeamDetailPage() {
           <TeamPatch name={team.artist.name} size="lg" />
         </motion.div>
         <p className="draft-label mt-4">Community</p>
-        <h1 className="font-display text-4xl text-accent mt-1">Team {team.artist.name}</h1>
+        <h1 className="font-headline text-5xl text-accent mt-1 leading-none">Team {team.artist.name}</h1>
         {team.team_rank && (
           <p className="text-muted text-sm mt-2">
             Rank <span className="text-gold font-display text-lg">{team.team_rank}</span> among all teams
           </p>
         )}
-        <p className="font-display text-5xl text-gold mt-4">{team.member_count}</p>
+        <p className="font-display text-6xl text-gold mt-4 rank-num">{team.member_count}</p>
         <p className="draft-label mt-1">Total Members</p>
       </div>
 

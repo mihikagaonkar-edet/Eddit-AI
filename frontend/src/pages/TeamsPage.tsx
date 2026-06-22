@@ -20,18 +20,18 @@ export function TeamsPage() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 pt-6 space-y-6 pb-8">
-      <div>
+      <header className="page-header">
         <p className="draft-label">Allegiance</p>
-        <h1 className="font-display text-4xl text-off-white mt-1">Teams</h1>
-        <p className="text-muted text-sm mt-1">Pick your artist. One team. All in.</p>
-      </div>
+        <h1 className="font-headline text-5xl text-off-white mt-1">Teams</h1>
+        <p className="text-muted text-sm mt-2">Pick your artist. One team. All in.</p>
+      </header>
 
       <input
         type="search"
         placeholder="Search teams by artist name..."
         value={search}
         onChange={(e) => setSearch(e.target.value)}
-        className="w-full draft-card px-4 py-2.5 text-sm text-off-white placeholder:text-muted focus:outline-none focus:border-accent/40"
+        className="input-stage"
       />
 
       {isLoading && <p className="text-muted">Loading...</p>}

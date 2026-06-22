@@ -93,7 +93,7 @@ export function Top5Display({ items, editable, onVote, onArgue, showVotes = true
 
   return (
     <div className="space-y-0">
-      <h2 className="font-serif text-2xl sm:text-3xl text-gold mb-4 tracking-wide">Top 5</h2>
+      <h2 className="font-headline text-3xl sm:text-4xl text-gold mb-4 tracking-wide">Top 5</h2>
 
       <div className="space-y-0">
         {sorted.map((item, i) => {
@@ -114,7 +114,7 @@ export function Top5Display({ items, editable, onVote, onArgue, showVotes = true
               <div className={`flex items-center gap-2 sm:gap-4 w-full ${isHero ? 'flex-wrap sm:flex-nowrap' : ''}`}>
                 <div className="w-12 sm:w-14 shrink-0 flex items-center justify-center">
                   <span
-                    className={`font-serif leading-none ${
+                    className={`rank-num leading-none ${
                       isHero ? 'text-gold ' + rankSizes[0] : 'text-accent ' + rankSizes[i]
                     }`}
                   >

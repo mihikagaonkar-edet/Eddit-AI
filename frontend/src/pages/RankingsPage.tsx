@@ -17,11 +17,11 @@ export function RankingsPage() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 pt-6 space-y-8 pb-8">
-      <div>
+      <header className="page-header">
         <p className="draft-label">Competition</p>
-        <h1 className="font-display text-4xl text-off-white mt-1">Rankings</h1>
-        <p className="text-muted text-sm mt-1">Discovery. Debate. Bragging rights.</p>
-      </div>
+        <h1 className="font-headline text-5xl text-off-white mt-1">Rankings</h1>
+        <p className="text-muted text-sm mt-2">Discovery. Debate. Bragging rights.</p>
+      </header>
 
       <Leaderboard title="Top Artists" items={data.top_artists.map((a) => ({ id: a.id, name: a.name, sub: ratingSub(a), link: `/artists/${a.id}` }))} />
       <Leaderboard title="Top Teams" items={data.top_teams.map((a) => ({ id: a.id, name: `Team ${a.name}`, sub: ratingSub(a), link: `/teams/${a.id}` }))} />
@@ -40,7 +40,7 @@ export function RankingsPage() {
                 i === 0 ? 'draft-card-hero' : ''
               }`}
             >
-              <span className={`font-display text-2xl w-8 ${i === 0 ? 'text-gold' : 'text-muted'}`}>
+              <span className={`rank-num text-3xl w-10 ${i === 0 ? 'text-gold' : 'text-muted'}`}>
                 {i + 1}
               </span>
               <div>
@@ -74,7 +74,7 @@ function Leaderboard({
               i === 0 ? 'draft-card-hero' : 'draft-card-row'
             }`}
           >
-            <span className={`font-display text-2xl w-8 shrink-0 ${i === 0 ? 'text-gold' : 'text-muted'}`}>
+            <span className={`rank-num text-3xl w-10 shrink-0 ${i === 0 ? 'text-gold' : 'text-muted'}`}>
               {i + 1}
             </span>
             <ArtistAvatar name={item.name.replace(/^Team /, '')} size="sm" />

@@ -20,17 +20,17 @@ export function ArtistsPage() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 pt-6 space-y-6 pb-8">
-      <div>
+      <header className="page-header">
         <p className="draft-label">Roster</p>
-        <h1 className="font-display text-4xl text-off-white mt-1">Artists</h1>
-      </div>
+        <h1 className="font-headline text-5xl text-off-white mt-1">Artists</h1>
+      </header>
 
       <input
         type="search"
         placeholder="Search artists by name..."
         value={search}
         onChange={(e) => setSearch(e.target.value)}
-        className="w-full draft-card px-4 py-2.5 text-sm text-off-white placeholder:text-muted focus:outline-none focus:border-accent/40"
+        className="input-stage"
       />
 
       {isLoading && <p className="text-muted">Loading...</p>}

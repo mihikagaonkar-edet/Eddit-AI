@@ -31,7 +31,7 @@ export function ArtistDetailPage() {
         <ArtistAvatar name={artist.name} size="lg" />
         <div>
           <p className="draft-label mb-1">Artist</p>
-          <h1 className="font-display text-4xl text-off-white">{artist.name}</h1>
+          <h1 className="font-headline text-5xl text-off-white leading-none">{artist.name}</h1>
           {artist.rating != null && (
             <p className="text-gold font-display text-2xl mt-1">★ {artist.rating}</p>
           )}

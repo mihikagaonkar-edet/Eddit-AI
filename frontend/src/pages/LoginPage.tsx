@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 
 export function LoginPage() {
@@ -25,11 +26,16 @@ export function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4">
-      <form onSubmit={handleSubmit} className="w-full max-w-sm space-y-4 draft-card p-6">
-        <div className="text-center mb-2">
-          <h1 className="font-display text-5xl text-accent tracking-widest">EDDIT</h1>
-          <p className="draft-label mt-3">Welcome back</p>
+    <div className="auth-stage">
+      <motion.form
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        onSubmit={handleSubmit}
+        className="relative z-10 w-full max-w-sm space-y-4 draft-card p-8"
+      >
+        <div className="text-center mb-4">
+          <h1 className="font-headline text-6xl text-accent tracking-wide leading-none">EDDIT</h1>
+          <p className="draft-label mt-4">Welcome back</p>
         </div>
         <div>
           <label className="draft-label">Username</label>
@@ -37,7 +43,7 @@ export function LoginPage() {
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             required
-            className="w-full mt-1 draft-card px-4 py-2.5 text-sm focus:outline-none focus:border-accent/40"
+            className="input-stage mt-1"
           />
         </div>
         <div>
@@ -47,7 +53,7 @@ export function LoginPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="w-full mt-1 draft-card px-4 py-2.5 text-sm focus:outline-none focus:border-accent/40"
+            className="input-stage mt-1"
           />
         </div>
         {error && <p className="text-red-400 text-sm">{error}</p>}
@@ -55,9 +61,9 @@ export function LoginPage() {
           {loading ? 'Logging in...' : 'Log In'}
         </button>
         <p className="text-center text-sm text-muted">
-          New here? <Link to="/signup" className="text-accent font-medium">Create your identity</Link>
+          New here? <Link to="/signup" className="text-accent font-semibold hover:underline">Create your identity</Link>
         </p>
-      </form>
+      </motion.form>
     </div>
   );
 }

@@ -82,18 +82,20 @@ export function SignupPage() {
   const stepIndex = steps.indexOf(step);
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-12">
-      <div className="w-full max-w-md">
+    <div className="auth-stage py-12">
+      <div className="relative z-10 w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className="font-display text-5xl text-accent tracking-widest">EDDIT</h1>
-          <p className="draft-label mt-3">Show us your Top 5.</p>
+          <h1 className="font-headline text-6xl text-accent tracking-wide leading-none">EDDIT</h1>
+          <p className="draft-label mt-4">Show us your Top 5.</p>
         </div>
 
         <div className="flex gap-2 mb-8">
           {steps.map((s, i) => (
             <div
               key={s}
-              className={`flex-1 h-1 rounded-full ${i <= stepIndex ? 'bg-accent' : 'bg-white/10'}`}
+              className={`flex-1 h-1.5 rounded-full transition-colors ${
+                i <= stepIndex ? 'bg-accent shadow-[0_0_12px_rgba(255,85,51,0.5)]' : 'bg-white/10'
+              }`}
             />
           ))}
         </div>
@@ -109,7 +111,7 @@ export function SignupPage() {
               className="space-y-4"
             >
               <p className="draft-label">Step 1</p>
-              <h2 className="font-display text-3xl mt-1">Create Account</h2>
+              <h2 className="font-headline text-4xl mt-1">Create Account</h2>
               <Input label="Name" value={form.name} onChange={(v) => setForm({ ...form, name: v })} required />
               <Input label="Username" value={form.username} onChange={(v) => setForm({ ...form, username: v })} required />
               <Input label="Email" type="email" value={form.email} onChange={(v) => setForm({ ...form, email: v })} required />
@@ -134,7 +136,7 @@ export function SignupPage() {
               className="space-y-4"
             >
               <p className="draft-label">Step 2</p>
-              <h2 className="font-display text-3xl mt-1">Select Your Top 5</h2>
+              <h2 className="font-headline text-4xl mt-1">Select Your Top 5</h2>
               <p className="text-muted text-sm mt-1">This is your identity. Choose wisely.</p>
               <Top5Picker selected={selected} onChange={setSelected} />
               {error && <p className="text-red-400 text-sm">{error}</p>}
@@ -153,7 +155,7 @@ export function SignupPage() {
               className="space-y-4"
             >
               <p className="draft-label">Step 3</p>
-              <h2 className="font-display text-3xl mt-1">Join a Team</h2>
+              <h2 className="font-headline text-4xl mt-1">Join a Team</h2>
               <p className="text-muted text-sm mt-1">Pick your artist allegiance.</p>
               <div className="grid grid-cols-2 gap-1.5 max-h-80 overflow-y-auto">
                 {artists.map((artist) => (
@@ -204,7 +206,7 @@ function Input({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         required={required}
-        className="w-full mt-1 draft-card px-4 py-2.5 text-sm focus:outline-none focus:border-accent/40"
+        className="w-full mt-1 input-stage"
       />
     </div>
   );

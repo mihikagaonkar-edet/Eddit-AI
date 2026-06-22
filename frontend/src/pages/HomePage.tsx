@@ -87,8 +87,8 @@ function SectionHeader({
   return (
     <div className="mb-6">
       <p className="draft-label">{label}</p>
-      <h2 className="font-display text-3xl sm:text-4xl text-off-white mt-1 tracking-wide">{title}</h2>
-      {description && <p className="text-muted text-sm sm:text-base mt-2 max-w-2xl">{description}</p>}
+      <h2 className="font-headline text-4xl sm:text-5xl text-off-white mt-1 tracking-wide">{title}</h2>
+      {description && <p className="text-muted text-sm sm:text-base mt-2 max-w-2xl leading-relaxed">{description}</p>}
     </div>
   );
 }
@@ -170,17 +170,13 @@ export function HomePage() {
   return (
     <div className="max-w-6xl mx-auto px-4 pt-6 pb-16 space-y-20">
       {/* 1. Hero */}
-      <section className="relative overflow-hidden draft-card-hero px-6 py-12 sm:px-10 sm:py-16 text-center">
-        <div
-          className="pointer-events-none absolute inset-0 opacity-40"
-          style={{
-            background:
-              'radial-gradient(ellipse 70% 60% at 50% 0%, rgba(255,107,74,0.15), transparent), radial-gradient(ellipse 50% 40% at 100% 100%, rgba(212,175,55,0.1), transparent)',
-          }}
-        />
-        <div className="relative">
-          <p className="draft-label mb-3">Eddit AI</p>
-          <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl text-off-white leading-tight tracking-wide">
+      <section className="relative stage-hero px-6 py-14 sm:px-10 sm:py-20 text-center">
+        <div className="relative z-10">
+          <p className="draft-label mb-3 flex items-center justify-center gap-2">
+            <span className="live-dot" aria-hidden />
+            Eddit AI
+          </p>
+          <h1 className="font-headline text-5xl sm:text-6xl lg:text-7xl text-off-white leading-none tracking-wide">
             Your Top 5 Says Everything
           </h1>
           <p className="text-muted text-base sm:text-lg mt-4 max-w-xl mx-auto">
@@ -215,10 +211,8 @@ export function HomePage() {
               transition={{ delay: i * 0.05 }}
               className="draft-card-row px-4 py-4 flex items-start gap-3"
             >
-              <span className="text-accent text-lg leading-none mt-0.5" aria-hidden>
-                ●
-              </span>
-              <p className="text-sm sm:text-base text-off-white/90">{line}</p>
+              <span className="live-dot mt-1.5" aria-hidden />
+              <p className="text-sm sm:text-base text-off-white/90 leading-snug">{line}</p>
             </motion.div>
           ))}
         </div>
@@ -253,12 +247,12 @@ export function HomePage() {
               const stats = teamStatsQueries[i]?.data;
               const fanCount = stats?.member_count;
               return (
-                <div key={team.id} className="draft-card p-4 flex flex-col items-center text-center">
+                <div key={team.id} className="team-war-card">
                   <ArtistAvatar name={team.name} size="xl" />
                   <p className="font-display text-lg text-accent mt-4 tracking-wide">
                     Team {team.name}
                   </p>
-                  <p className="text-muted text-xs mt-1">
+                  <p className="text-muted text-xs mt-1 font-display tracking-wider">
                     {fanCount != null
                       ? `${fanCount.toLocaleString()} fan${fanCount === 1 ? '' : 's'}`
                       : team.rating != null
@@ -307,10 +301,13 @@ export function HomePage() {
                   }`}
                 >
                   <div className="flex items-center gap-3 min-w-0">
+                    <span className={`rank-num text-2xl w-8 shrink-0 ${i === 0 ? 'text-gold' : 'text-muted'}`}>
+                      {i + 1}
+                    </span>
                     <ArtistAvatar name={artist.name} size="md" />
                     <span className="font-serif text-lg sm:text-xl truncate">{artist.name}</span>
                   </div>
-                  <span className="font-display text-2xl sm:text-3xl text-gold tabular-nums shrink-0 ml-3">
+                  <span className="rank-num text-3xl sm:text-4xl text-gold tabular-nums shrink-0 ml-3">
                     {artist.rating ?? '—'}
                   </span>
                 </Link>
@@ -332,11 +329,10 @@ export function HomePage() {
         />
         <div className="space-y-3 mb-6">
           {debateLines.map((quote, i) => (
-            <blockquote
-              key={`${quote}-${i}`}
-              className="draft-card-row px-5 py-4 border-l-accent/60"
-            >
-              <p className="font-serif text-lg text-off-white/95 italic">&ldquo;{quote}&rdquo;</p>
+            <blockquote key={`${quote}-${i}`} className="debate-quote">
+              <p className="font-serif text-lg text-off-white/95 italic leading-relaxed">
+                &ldquo;{quote}&rdquo;
+              </p>
             </blockquote>
           ))}
         </div>
