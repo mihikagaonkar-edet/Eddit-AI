@@ -1,6 +1,6 @@
-import { useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useSearchParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useEffect, useState } from 'react';
 import { api } from '../api/client';
 import { Top5Display } from '../components/Top5Display';
 import { Top5Picker } from '../components/Top5Picker';
@@ -17,10 +17,16 @@ export function ProfilePage() {
   const { user: currentUser } = useAuth();
   const username = paramUsername || currentUser?.username;
   const isOwnProfile = !paramUsername || paramUsername === currentUser?.username;
+  const [searchParams, setSearchParams] = useSearchParams();
   const [editing, setEditing] = useState(false);
   const [arguingItem, setArguingItem] = useState<Top5Item | null>(null);
   const queryClient = useQueryClient();
 
+  useEffect(() => {
+    if (searchParams.get('edit') !== 'top5' || !isOwnProfile) return;
+    setEditing(true);
+    setSearchParams({}, { replace: true });
+  }, [searchParams, isOwnProfile, setSearchParams]);
   const { data: profile } = useQuery({
     queryKey: ['user', username],
     queryFn: () => api.getUser(username!),

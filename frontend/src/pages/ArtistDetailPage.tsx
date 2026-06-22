@@ -2,6 +2,7 @@ import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../api/client';
 import { ArtistAvatar } from '../components/ArtistAvatar';
+import { useAuth } from '../context/AuthContext';
 
 function formatNumber(n?: number | null) {
   if (!n) return '—';
@@ -12,6 +13,7 @@ function formatNumber(n?: number | null) {
 
 export function ArtistDetailPage() {
   const { id } = useParams<{ id: string }>();
+  const { user } = useAuth();
   const { data: stats, isLoading } = useQuery({
     queryKey: ['artist-stats', id],
     queryFn: () => api.getArtistStats(id!),
@@ -79,7 +81,10 @@ export function ArtistDetailPage() {
         )}
       </Section>
 
-      <Link to={`/teams/${artist.id}`} className="block text-center btn-primary py-3">
+      <Link
+        to={user ? `/teams/${artist.id}` : '/login'}
+        className="block text-center btn-primary py-3"
+      >
         Join Team {artist.name}
       </Link>
     </div>

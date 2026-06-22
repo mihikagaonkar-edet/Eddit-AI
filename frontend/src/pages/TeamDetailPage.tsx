@@ -54,6 +54,11 @@ export function TeamDetailPage() {
         <p className="draft-label mt-1">Total Members</p>
       </div>
 
+      {!user && (
+        <Link to="/login" className="block w-full btn-primary py-3 text-center">
+          Join Team {team.artist.name}
+        </Link>
+      )}
       {user && !isMember && (
         <motion.button
           whileTap={{ scale: 0.97 }}

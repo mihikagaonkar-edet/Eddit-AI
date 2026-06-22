@@ -1,219 +1,349 @@
-import { useMemo, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
-import { api, getApiBaseUrl } from '../api/client';
-import type { Artist } from '../types';
+import { useMemo } from 'react';
+import { Link } from 'react-router-dom';
+import { useQueries, useQuery } from '@tanstack/react-query';
+import { motion } from 'framer-motion';
+import { api } from '../api/client';
+import { ArtistAvatar } from '../components/ArtistAvatar';
+import { PersonCard } from '../components/PersonCard';
+import { useAuth } from '../context/AuthContext';
+import type { Artist, HomeFeed, UserPeopleItem } from '../types';
 
-type SortField = keyof Pick<
-  Artist,
-  | 'name'
-  | 'rating'
-  | 'billboard_top_10'
-  | 'billboard_number_1'
-  | 'albums_sold'
-  | 'singles_sold'
-  | 'avg_songs_per_year'
-  | 'awards'
-  | 'youtube_views'
-  | 'spotify_monthly_listeners'
->;
+const FEATURED_TEAM_NAMES = ['Drake', 'Beyoncé', 'Taylor Swift', 'Eminem', 'Rihanna'];
 
-type SortDirection = 'asc' | 'desc';
-
-const SORT_OPTIONS: { value: SortField; label: string }[] = [
-  { value: 'name', label: 'Name' },
-  { value: 'rating', label: 'Rating' },
-  { value: 'billboard_top_10', label: 'Billboard Top 10' },
-  { value: 'billboard_number_1', label: 'Billboard #1' },
-  { value: 'albums_sold', label: 'Albums Sold' },
-  { value: 'singles_sold', label: 'Singles Sold' },
-  { value: 'avg_songs_per_year', label: 'Avg Songs / Year' },
-  { value: 'awards', label: 'Awards' },
-  { value: 'youtube_views', label: 'YouTube Views' },
-  { value: 'spotify_monthly_listeners', label: 'Spotify Listeners' },
+const SAMPLE_FEED = [
+  'Mike joined Team Drake',
+  'Sarah moved Kendrick to #1',
+  'Jamal added 50 Cent to his Top 5',
+  'Team Beyoncé gained 42 fans today',
 ];
 
-const COLUMNS: { key: SortField; label: string; align?: 'right' }[] = SORT_OPTIONS.map((o) => ({
-  key: o.value,
-  label: o.label,
-  align: o.value === 'name' ? undefined : 'right',
-}));
+const SAMPLE_DEBATES = [
+  'No way Drake is over Wayne.',
+  'Beyoncé belongs top 3 easy.',
+  'This list needs 50 Cent.',
+];
 
-function formatNumber(n?: number | null) {
-  if (n == null) return '—';
-  if (n >= 1_000_000_000) return `${(n / 1_000_000_000).toFixed(1)}B`;
-  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
-  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
-  return n.toLocaleString();
+function findArtist(artists: Artist[], ...candidates: string[]): Artist | undefined {
+  for (const name of candidates) {
+    const needle = name.toLowerCase();
+    const hit = artists.find(
+      (a) =>
+        a.name.toLowerCase() === needle ||
+        a.name.toLowerCase().includes(needle) ||
+        needle.includes(a.name.toLowerCase())
+    );
+    if (hit) return hit;
+  }
+  return undefined;
 }
 
-function cellValue(artist: Artist, key: SortField): string {
-  const val = artist[key];
-  if (val == null) return '—';
-  if (key === 'name') return artist.name;
-  if (key === 'avg_songs_per_year' || key === 'rating') return String(val);
-  return formatNumber(val as number);
-}
+function buildFeedLines(home: HomeFeed | undefined, people: UserPeopleItem[]): string[] {
+  const lines: string[] = [];
 
-function compareValues(a: Artist, b: Artist, field: SortField, direction: SortDirection): number {
-  const av = a[field];
-  const bv = b[field];
-
-  if (av == null && bv == null) return 0;
-  if (av == null) return 1;
-  if (bv == null) return -1;
-
-  let cmp: number;
-  if (field === 'name') {
-    cmp = String(av).localeCompare(String(bv), undefined, { sensitivity: 'base' });
-  } else {
-    cmp = Number(av) - Number(bv);
+  for (const user of home?.featured_profiles ?? []) {
+    if (user.current_team_artist && lines.length < 4) {
+      lines.push(`${user.name} joined Team ${user.current_team_artist.name}`);
+    }
   }
 
-  return direction === 'asc' ? cmp : -cmp;
+  for (const person of people) {
+    if (lines.length >= 4) break;
+    const hero = person.top5_items.find((i) => i.position === 1);
+    if (hero) {
+      lines.push(`${person.name} has ${hero.artist.name} at #1`);
+    }
+  }
+
+  for (const artist of home?.fastest_growing_teams ?? []) {
+    if (lines.length >= 4) break;
+    lines.push(`Team ${artist.name} is gaining momentum`);
+  }
+
+  for (const arg of home?.recent_arguments ?? []) {
+    if (lines.length >= 4) break;
+    if (arg.text_content?.trim()) {
+      const snippet =
+        arg.text_content.length > 60 ? `${arg.text_content.slice(0, 57)}...` : arg.text_content;
+      lines.push(`${arg.author.name}: ${snippet}`);
+    }
+  }
+
+  if (lines.length === 0) return SAMPLE_FEED;
+  while (lines.length < 4) {
+    lines.push(SAMPLE_FEED[lines.length % SAMPLE_FEED.length]);
+  }
+  return lines.slice(0, 4);
+}
+
+function SectionHeader({
+  label,
+  title,
+  description,
+}: {
+  label: string;
+  title: string;
+  description?: string;
+}) {
+  return (
+    <div className="mb-6">
+      <p className="draft-label">{label}</p>
+      <h2 className="font-display text-3xl sm:text-4xl text-off-white mt-1 tracking-wide">{title}</h2>
+      {description && <p className="text-muted text-sm sm:text-base mt-2 max-w-2xl">{description}</p>}
+    </div>
+  );
 }
 
 export function HomePage() {
-  const navigate = useNavigate();
-  const [search, setSearch] = useState('');
-  const [sortField, setSortField] = useState<SortField>('rating');
-  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
+  const { user } = useAuth();
 
-  const { data: artists = [], isLoading, isError, error } = useQuery({
-    queryKey: ['artists', 'all'],
-    queryFn: () => api.getArtists(0, 1000),
+  const { data: home, isLoading: homeLoading } = useQuery({
+    queryKey: ['home'],
+    queryFn: api.getHome,
   });
 
-  const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    let list = q
-      ? artists.filter((a) => a.name.toLowerCase().includes(q))
-      : [...artists];
+  const { data: rankings, isLoading: rankingsLoading } = useQuery({
+    queryKey: ['rankings'],
+    queryFn: api.getRankings,
+  });
 
-    list.sort((a, b) => compareValues(a, b, sortField, sortDirection));
-    return list;
-  }, [artists, search, sortField, sortDirection]);
+  const { data: people = [] } = useQuery({
+    queryKey: ['people'],
+    queryFn: api.getPeople,
+  });
+
+  const { data: teams = [] } = useQuery({
+    queryKey: ['teams'],
+    queryFn: api.getTeams,
+  });
+
+  const featuredTeams = useMemo(() => {
+    const picked: Artist[] = [];
+    for (const name of FEATURED_TEAM_NAMES) {
+      const artist = findArtist(teams, name);
+      if (artist && !picked.some((p) => p.id === artist.id)) picked.push(artist);
+    }
+    if (picked.length < 5) {
+      for (const team of rankings?.top_teams ?? teams) {
+        if (picked.length >= 5) break;
+        if (!picked.some((p) => p.id === team.id)) picked.push(team);
+      }
+    }
+    return picked.slice(0, 5);
+  }, [teams, rankings?.top_teams]);
+
+  const teamStatsQueries = useQueries({
+    queries: featuredTeams.map((team) => ({
+      queryKey: ['team', team.id, 'home'],
+      queryFn: () => api.getTeam(team.id),
+      staleTime: 60_000,
+    })),
+  });
+
+  const feedLines = useMemo(() => buildFeedLines(home, people), [home, people]);
+
+  const recentJoiners = useMemo(() => {
+    const featured = home?.featured_profiles ?? [];
+    return featured
+      .slice(0, 2)
+      .map((profile) => people.find((p) => p.username === profile.username))
+      .filter((p): p is UserPeopleItem => !!p);
+  }, [home?.featured_profiles, people]);
+
+  const topRated = useMemo(() => {
+    const artists = rankings?.top_artists ?? [];
+    if (artists.length >= 4) return artists.slice(0, 4);
+    return artists;
+  }, [rankings?.top_artists]);
+
+  const debateLines = useMemo(() => {
+    const fromApi =
+      home?.recent_arguments
+        ?.map((a) => a.text_content?.trim())
+        .filter((t): t is string => !!t)
+        .slice(0, 3) ?? [];
+    if (fromApi.length >= 3) return fromApi;
+    return [...fromApi, ...SAMPLE_DEBATES].slice(0, 3);
+  }, [home?.recent_arguments]);
+
+  const isLoading = homeLoading || rankingsLoading;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 pt-6 pb-8 space-y-4">
-      <header className="mb-2">
-        <h1 className="font-display text-5xl text-accent md:hidden tracking-widest">EDDIT</h1>
-        <p className="draft-label mt-1">Discovery</p>
-        <p className="font-display text-2xl md:text-4xl mt-1 text-off-white">Show us your Top 5.</p>
-      </header>
-
-      <input
-        type="search"
-        placeholder="Search artists by name..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        className="w-full draft-card px-4 py-2.5 text-sm text-off-white placeholder:text-muted focus:outline-none focus:border-accent/40"
-      />
-
-      <div className="flex flex-wrap gap-3 items-center">
-        <label className="flex items-center gap-2 text-sm">
-          <span className="text-muted">Sort by</span>
-          <select
-            value={sortField}
-            onChange={(e) => setSortField(e.target.value as SortField)}
-            className="draft-card px-3 py-2 text-sm focus:outline-none focus:border-accent/40"
-          >
-            {SORT_OPTIONS.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
-        </label>
-
-        <div className="flex rounded-lg border border-white/10 overflow-hidden text-sm">
-          <button
-            type="button"
-            onClick={() => setSortDirection('asc')}
-            className={`px-3 py-2 transition-colors font-medium ${
-              sortDirection === 'asc' ? 'bg-accent text-charcoal' : 'bg-charcoal-card text-muted hover:text-off-white'
-            }`}
-          >
-            Asc
-          </button>
-          <button
-            type="button"
-            onClick={() => setSortDirection('desc')}
-            className={`px-3 py-2 transition-colors font-medium ${
-              sortDirection === 'desc' ? 'bg-accent text-charcoal' : 'bg-charcoal-card text-muted hover:text-off-white'
-            }`}
-          >
-            Desc
-          </button>
+    <div className="max-w-6xl mx-auto px-4 pt-6 pb-16 space-y-20">
+      {/* 1. Hero */}
+      <section className="relative overflow-hidden draft-card-hero px-6 py-12 sm:px-10 sm:py-16 text-center">
+        <div
+          className="pointer-events-none absolute inset-0 opacity-40"
+          style={{
+            background:
+              'radial-gradient(ellipse 70% 60% at 50% 0%, rgba(255,107,74,0.15), transparent), radial-gradient(ellipse 50% 40% at 100% 100%, rgba(212,175,55,0.1), transparent)',
+          }}
+        />
+        <div className="relative">
+          <p className="draft-label mb-3">Eddit AI</p>
+          <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl text-off-white leading-tight tracking-wide">
+            Your Top 5 Says Everything
+          </h1>
+          <p className="text-muted text-base sm:text-lg mt-4 max-w-xl mx-auto">
+            Build your music identity. Join one artist team. Debate the rankings.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center mt-8">
+            <Link
+              to={user ? '/profile?edit=top5' : '/signup'}
+              className="btn-primary px-6 py-3 text-sm font-semibold"
+            >
+              {user ? 'Edit My Top 5' : 'Create My Top 5'}
+            </Link>
+            <Link to="/artists" className="btn-ghost px-6 py-3 text-sm font-semibold">
+              Browse Artists
+            </Link>
+          </div>
+          <p className="text-xs text-muted mt-6">
+            New Eddit Ratings drop every Monday at 7 PM EST.
+          </p>
         </div>
+      </section>
 
-        <span className="text-muted text-sm ml-auto">
-          {filtered.length} artist{filtered.length === 1 ? '' : 's'}
-        </span>
-      </div>
+      {/* 2. Live Fandom Feed */}
+      <section>
+        <SectionHeader label="Live" title="What's Happening Right Now" />
+        <div className="grid sm:grid-cols-2 gap-3">
+          {feedLines.map((line, i) => (
+            <motion.div
+              key={`${line}-${i}`}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.05 }}
+              className="draft-card-row px-4 py-4 flex items-start gap-3"
+            >
+              <span className="text-accent text-lg leading-none mt-0.5" aria-hidden>
+                ●
+              </span>
+              <p className="text-sm sm:text-base text-off-white/90">{line}</p>
+            </motion.div>
+          ))}
+        </div>
+      </section>
 
-      {isLoading && <p className="text-muted">Loading artists...</p>}
+      {/* 3. Top 5 Spotlight */}
+      <section>
+        <SectionHeader label="Spotlight" title="Top 5 Spotlight" />
+        {recentJoiners.length > 0 ? (
+          <div className="grid sm:grid-cols-2 gap-3 max-w-4xl">
+            {recentJoiners.map((person) => (
+              <PersonCard key={person.id} person={person} />
+            ))}
+          </div>
+        ) : (
+          <p className="text-muted text-sm">No profiles yet — be the first to join.</p>
+        )}
+      </section>
 
-      {isError && (
-        <p className="text-red-400 text-sm">
-          Could not load artists: {error instanceof Error ? error.message : 'Request failed'}
-        </p>
-      )}
-
-      {!isLoading && !isError && (
-        <div className="table-scroll-wrap">
-          <table className="min-w-max w-full text-sm">
-            <thead>
-              <tr className="border-b border-white/10">
-                {COLUMNS.map((col) => (
-                  <th
-                    key={col.key}
-                    className={`px-3 py-3 draft-label whitespace-nowrap ${
-                      col.align === 'right' ? 'text-right' : 'text-left'
-                    }`}
+      {/* 4. Team War */}
+      <section>
+        <SectionHeader
+          label="Allegiance"
+          title="Pick A Side"
+          description="You can like every artist. You can only represent one team."
+        />
+        {isLoading && featuredTeams.length === 0 ? (
+          <p className="text-muted">Loading teams...</p>
+        ) : (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3">
+            {featuredTeams.map((team, i) => {
+              const stats = teamStatsQueries[i]?.data;
+              const fanCount = stats?.member_count;
+              return (
+                <div key={team.id} className="draft-card p-4 flex flex-col items-center text-center">
+                  <ArtistAvatar name={team.name} size="xl" />
+                  <p className="font-display text-lg text-accent mt-4 tracking-wide">
+                    Team {team.name}
+                  </p>
+                  <p className="text-muted text-xs mt-1">
+                    {fanCount != null
+                      ? `${fanCount.toLocaleString()} fan${fanCount === 1 ? '' : 's'}`
+                      : team.rating != null
+                        ? `★ ${team.rating}`
+                        : 'Join the movement'}
+                  </p>
+                  <Link
+                    to={user ? `/teams/${team.id}` : '/login'}
+                    className="mt-4 w-full btn-primary py-2 text-xs font-semibold"
                   >
-                    {col.label}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((artist, idx) => (
-                <tr
+                    Join Team
+                  </Link>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </section>
+
+      {/* 5. Weekly Ratings */}
+      <section>
+        <SectionHeader
+          label="Weekly drop"
+          title="Eddit Ratings"
+          description="Updated every Monday at 7 PM EST based on Top 5 placements, team growth, likes, dislikes, comments, and fan momentum."
+        />
+        {isLoading && topRated.length === 0 ? (
+          <p className="text-muted">Loading ratings...</p>
+        ) : (
+          <>
+            <div className="grid sm:grid-cols-2 gap-3 mb-6">
+              {(topRated.length > 0
+                ? topRated
+                : [
+                    { id: '1', name: 'Drake', rating: 97 },
+                    { id: '2', name: 'Taylor Swift', rating: 97 },
+                    { id: '3', name: 'Beyoncé', rating: 96 },
+                    { id: '4', name: 'Rihanna', rating: 95 },
+                  ]
+              ).map((artist, i) => (
+                <Link
                   key={artist.id}
-                  onClick={() => navigate(`/artists/${artist.id}`)}
-                  className={`border-b border-white/5 hover:bg-white/5 cursor-pointer transition-colors ${
-                    idx === 0 && sortField === 'rating' && sortDirection === 'desc' ? 'border-l-2 border-l-gold' : ''
+                  to={`/artists/${artist.id}`}
+                  className={`flex items-center justify-between p-4 transition-colors hover:border-accent/30 ${
+                    i === 0 ? 'draft-card-hero' : 'draft-card-row'
                   }`}
                 >
-                  {COLUMNS.map((col) => (
-                    <td
-                      key={col.key}
-                      className={`px-3 py-3 whitespace-nowrap ${
-                        col.align === 'right' ? 'text-right tabular-nums' : 'text-left'
-                      } ${col.key === 'name' ? 'font-display text-base tracking-wide' : 'text-off-white/90'}`}
-                    >
-                      {cellValue(artist, col.key)}
-                    </td>
-                  ))}
-                </tr>
+                  <div className="flex items-center gap-3 min-w-0">
+                    <ArtistAvatar name={artist.name} size="md" />
+                    <span className="font-serif text-lg sm:text-xl truncate">{artist.name}</span>
+                  </div>
+                  <span className="font-display text-2xl sm:text-3xl text-gold tabular-nums shrink-0 ml-3">
+                    {artist.rating ?? '—'}
+                  </span>
+                </Link>
               ))}
-              {filtered.length === 0 && (
-                <tr>
-                  <td colSpan={COLUMNS.length} className="px-3 py-8 text-center text-muted space-y-2">
-                    <p>No artists found</p>
-                    {artists.length === 0 && (
-                      <p className="text-xs text-red-400/90">
-                        API: {getApiBaseUrl()} — if requests fail, set API_URL on the Railway frontend service
-                      </p>
-                    )}
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+            </div>
+            <Link to="/rankings" className="btn-ghost px-5 py-2.5 text-sm font-semibold inline-block">
+              See Full Ratings
+            </Link>
+          </>
+        )}
+      </section>
+
+      {/* 6. Debate */}
+      <section>
+        <SectionHeader
+          label="Arguments"
+          title="Debate The Top 5"
+          description="Comment, like, dislike, and challenge other fans' lists."
+        />
+        <div className="space-y-3 mb-6">
+          {debateLines.map((quote, i) => (
+            <blockquote
+              key={`${quote}-${i}`}
+              className="draft-card-row px-5 py-4 border-l-accent/60"
+            >
+              <p className="font-serif text-lg text-off-white/95 italic">&ldquo;{quote}&rdquo;</p>
+            </blockquote>
+          ))}
         </div>
-      )}
+        <Link to="/people" className="btn-ghost px-5 py-2.5 text-sm font-semibold inline-block">
+          Browse Top 5s
+        </Link>
+      </section>
     </div>
   );
 }
