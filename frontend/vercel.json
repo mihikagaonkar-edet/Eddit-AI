@@ -1,0 +1,12 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://peaceful-analysis-production-04ac.up.railway.app/api/:path*"
+    },
+    {
+      "source": "/uploads/:path*",
+      "destination": "https://peaceful-analysis-production-04ac.up.railway.app/uploads/:path*"
+    }
+  ]
+}
