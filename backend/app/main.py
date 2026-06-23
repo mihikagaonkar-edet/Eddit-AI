@@ -16,9 +16,14 @@ cors_kwargs: dict = {
     "allow_methods": ["*"],
     "allow_headers": ["*"],
 }
+origin_regexes: list[str] = []
 if settings.cors_allow_railway:
     # Avoid CORS mismatches when frontend/backend Railway URLs differ slightly from CORS_ORIGINS.
-    cors_kwargs["allow_origin_regex"] = r"https://.*\.up\.railway\.app"
+    origin_regexes.append(r"https://.*\.up\.railway\.app")
+if settings.cors_allow_vercel:
+    origin_regexes.append(r"https://.*\.vercel\.app")
+if origin_regexes:
+    cors_kwargs["allow_origin_regex"] = "|".join(origin_regexes)
 
 app.add_middleware(CORSMiddleware, **cors_kwargs)
 

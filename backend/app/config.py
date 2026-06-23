@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     upload_dir: str = "uploads"
     cors_origins: str = "http://localhost:5173"
     cors_allow_railway: bool = True
+    cors_allow_vercel: bool = True
 
     @field_validator("database_url", mode="before")
     @classmethod
