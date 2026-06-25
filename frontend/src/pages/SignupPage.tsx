@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { Top5Picker } from '../components/Top5Picker';
+import { ProfilePhotoField } from '../components/ProfilePhotoField';
 import { api } from '../api/client';
 import type { Artist } from '../types';
 import { ArtistAvatar } from '../components/ArtistAvatar';
@@ -13,12 +14,24 @@ type Step = 'account' | 'top5' | 'team';
 export function SignupPage() {
   const [step, setStep] = useState<Step>('account');
   const [form, setForm] = useState({ name: '', username: '', email: '', password: '', city: '' });
+  const [profilePhoto, setProfilePhoto] = useState<File | null>(null);
   const [selected, setSelected] = useState<Map<number, Artist>>(new Map());
   const [teamId, setTeamId] = useState<string | null>(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { register, refreshUser } = useAuth();
   const navigate = useNavigate();
+
+  const profilePhotoPreview = useMemo(
+    () => (profilePhoto ? URL.createObjectURL(profilePhoto) : null),
+    [profilePhoto]
+  );
+
+  useEffect(() => {
+    return () => {
+      if (profilePhotoPreview) URL.revokeObjectURL(profilePhotoPreview);
+    };
+  }, [profilePhotoPreview]);
 
   const { data: artists = [] } = useQuery({
     queryKey: ['artists'],
@@ -32,6 +45,10 @@ export function SignupPage() {
     setLoading(true);
     try {
       await register(form);
+      if (profilePhoto) {
+        await api.uploadProfilePhoto(profilePhoto);
+        await refreshUser();
+      }
       setStep('top5');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Registration failed');
@@ -117,6 +134,13 @@ export function SignupPage() {
               <Input label="Email" type="email" value={form.email} onChange={(v) => setForm({ ...form, email: v })} required />
               <Input label="Password" type="password" value={form.password} onChange={(v) => setForm({ ...form, password: v })} required />
               <Input label="City" value={form.city} onChange={(v) => setForm({ ...form, city: v })} />
+              <ProfilePhotoField
+                name={form.name}
+                file={profilePhoto}
+                previewUrl={profilePhotoPreview}
+                onChange={setProfilePhoto}
+                disabled={loading}
+              />
               {error && <p className="text-red-400 text-sm">{error}</p>}
               <button type="submit" disabled={loading} className="w-full btn-primary py-3 disabled:opacity-50">
                 {loading ? 'Creating...' : 'Continue'}

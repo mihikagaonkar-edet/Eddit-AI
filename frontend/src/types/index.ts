@@ -22,6 +22,7 @@ export interface UserPeopleItem {
   name: string;
   username: string;
   city?: string | null;
+  profile_image_url?: string | null;
   current_team_artist?: Artist | null;
   top5_items: Top5ItemPeople[];
 }

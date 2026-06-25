@@ -7,7 +7,8 @@ import { Top5Picker } from '../components/Top5Picker';
 import { ArgumentThread } from '../components/ArgumentThread';
 import { SignOutButton } from '../components/SignOutButton';
 import { ShareProfileButton } from '../components/ShareProfileButton';
-import { TeamPatch } from '../components/TeamPatch';
+import { ProfilePhotoUpload } from '../components/ProfilePhotoUpload';
+import { UserAvatar } from '../components/UserAvatar';
 import { useAuth } from '../context/AuthContext';
 import { formatArtistName } from '../utils/formatArtistName';
 import type { Artist, Top5Item } from '../types';
@@ -60,17 +61,19 @@ export function ProfilePage() {
     <div className="max-w-2xl mx-auto px-4 pt-6 space-y-8 pb-8">
       {profile && (
         <header className="draft-card p-5 sm:p-6 border-white/8">
-          <div className="flex items-center gap-8 sm:gap-10">
-            {profile.current_team_artist && (
-              <Link
-                to={`/teams/${profile.current_team_artist.id}`}
-                className="shrink-0 hover:scale-[1.02] transition-transform"
-              >
-                <TeamPatch name={profile.current_team_artist.name} size="lg" />
-              </Link>
+          <div className="flex items-start gap-4 sm:gap-6">
+            {isOwnProfile && currentUser ? (
+              <ProfilePhotoUpload user={currentUser} username={profile.username} />
+            ) : (
+              <UserAvatar
+                name={profile.name}
+                profileImageUrl={profile.profile_image_url}
+                size="xl"
+              />
             )}
 
-            <div className="flex-1 min-w-0 flex gap-4">
+            <div className="flex items-center gap-4 sm:gap-6 flex-1 min-w-0">
+<div className="flex-1 min-w-0 flex gap-4">
               <div className="min-w-0 flex-1">
                 <p className="draft-label mb-1">Fan Identity</p>
                 {profile.current_team_artist && (
@@ -104,6 +107,7 @@ export function ProfilePage() {
                   teamName={profile.current_team_artist?.name}
                 />
               </div>
+            </div>
             </div>
           </div>
         </header>

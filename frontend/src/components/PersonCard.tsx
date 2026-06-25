@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { TeamBadge } from './TeamBadge';
+import { UserAvatar } from './UserAvatar';
 import type { UserPeopleItem } from '../types';
 
 export function PersonCard({ person }: { person: UserPeopleItem }) {
@@ -11,15 +12,12 @@ export function PersonCard({ person }: { person: UserPeopleItem }) {
         className="flex flex-col h-full draft-card p-4 block"
       >
         <div className="flex flex-col items-center text-center">
-          <div
-            className="w-12 h-12 rounded-lg border-2 border-gold/50 flex items-center justify-center font-display text-gold text-xl shrink-0"
-            style={{
-              background: 'linear-gradient(145deg, rgba(240,192,64,0.2), rgba(255,85,51,0.12))',
-              boxShadow: '0 0 20px rgba(240,192,64,0.12)',
-            }}
-          >
-            {person.name[0]?.toUpperCase()}
-          </div>
+          <UserAvatar
+            name={person.name}
+            profileImageUrl={person.profile_image_url}
+            size="md"
+            variant="gold"
+          />
           <p className="font-display text-sm mt-3 truncate w-full tracking-wide">{person.name}</p>
           <p className="text-muted text-xs truncate w-full">@{person.username}</p>
           {person.current_team_artist ? (

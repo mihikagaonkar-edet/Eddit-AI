@@ -30,6 +30,7 @@ app.add_middleware(CORSMiddleware, **cors_kwargs)
 upload_path = Path(settings.upload_dir)
 upload_path.mkdir(parents=True, exist_ok=True)
 (upload_path / "videos").mkdir(parents=True, exist_ok=True)
+(upload_path / "avatars").mkdir(parents=True, exist_ok=True)
 app.mount("/uploads", StaticFiles(directory=str(upload_path)), name="uploads")
 
 app.include_router(auth.router)

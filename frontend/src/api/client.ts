@@ -177,6 +177,25 @@ export const api = {
     return parseJsonResponse<import('../types').Video>(res);
   },
 
+  uploadProfilePhoto: async (file: File) => {
+    const form = new FormData();
+    form.append('file', file);
+    const token = getToken();
+    const base = getApiBase();
+    const res = await fetch(`${base}/api/users/me/avatar`, {
+      method: 'POST',
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      body: form,
+    });
+    if (!res.ok) {
+      const err = await parseJsonResponse<{ detail?: string }>(res).catch((e) => ({
+        detail: e instanceof Error ? e.message : res.statusText,
+      }));
+      throw new Error(err.detail || 'Upload failed');
+    }
+    return parseJsonResponse<import('../types').User>(res);
+  },
+
   vote: (top5_item_id: string, vote_type: 'like' | 'dislike') =>
     request<{ message: string }>('/api/votes', {
       method: 'POST',
@@ -198,6 +217,6 @@ export function clearToken() {
 }
 
 export function mediaUrl(path: string) {
-  if (path.startsWith('http')) return path;
+  if (path.startsWith('http') || path.startsWith('blob:') || path.startsWith('data:')) return path;
   return `${getApiBase()}${path}`;
 }

@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { api } from '../api/client';
 import { ArtistAvatar } from '../components/ArtistAvatar';
+import { UserAvatar } from '../components/UserAvatar';
 
 export function RankingsPage() {
   const { data, isLoading } = useQuery({
@@ -43,6 +44,7 @@ export function RankingsPage() {
               <span className={`rank-num text-3xl w-10 ${i === 0 ? 'text-gold' : 'text-muted'}`}>
                 {i + 1}
               </span>
+              <UserAvatar name={fan.name} profileImageUrl={fan.profile_image_url} size="sm" />
               <div>
                 <p className="font-display text-base tracking-wide">{fan.name}</p>
                 <p className="text-muted text-xs">@{fan.username}</p>

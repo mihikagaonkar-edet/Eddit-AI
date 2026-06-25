@@ -7,6 +7,7 @@ import type { Argument } from '../types';
 import { VideoRecorder } from './VideoRecorder';
 import { useAuth } from '../context/AuthContext';
 import { TeamBadge } from './TeamBadge';
+import { UserAvatar } from './UserAvatar';
 
 interface Props {
   targetType: string;
@@ -60,6 +61,13 @@ function ArgumentCard({
     <div style={{ marginLeft: depth * 16 }} className="mt-3">
       <div className="draft-card-row p-4">
         <div className="flex items-center gap-2 mb-2 flex-wrap">
+          <Link to={`/profile/${argument.author.username}`} className="shrink-0">
+            <UserAvatar
+              name={argument.author.name}
+              profileImageUrl={argument.author.profile_image_url}
+              size="sm"
+            />
+          </Link>
           <Link to={`/profile/${argument.author.username}`} className="font-display text-sm tracking-wide hover:text-accent">
             {argument.author.name}
           </Link>

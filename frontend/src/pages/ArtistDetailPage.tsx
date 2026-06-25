@@ -2,6 +2,7 @@ import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../api/client';
 import { ArtistAvatar } from '../components/ArtistAvatar';
+import { UserAvatar } from '../components/UserAvatar';
 import { useAuth } from '../context/AuthContext';
 
 function formatNumber(n?: number | null) {
@@ -61,7 +62,7 @@ export function ArtistDetailPage() {
         <div className="flex gap-3 flex-wrap">
           {stats.top_supporters.map((u) => (
             <Link key={u.id} to={`/profile/${u.username}`} className="text-center">
-              <ArtistAvatar name={u.name} size="md" />
+              <UserAvatar name={u.name} profileImageUrl={u.profile_image_url} size="md" />
               <p className="text-xs mt-1">{u.name}</p>
             </Link>
           ))}
@@ -72,8 +73,16 @@ export function ArtistDetailPage() {
       <Section title="Recent Arguments">
         {stats.recent_arguments.length > 0 ? (
           stats.recent_arguments.map((a) => (
-            <div key={a.id} className="draft-card-row p-3 mb-1.5 text-sm">
-              <span className="font-medium">{a.author.name}</span>: {a.text_content || '📹 Video argument'}
+            <div key={a.id} className="draft-card-row p-3 mb-1.5 text-sm flex items-start gap-2">
+              <UserAvatar
+                name={a.author.name}
+                profileImageUrl={a.author.profile_image_url}
+                size="sm"
+                className="mt-0.5"
+              />
+              <p>
+                <span className="font-medium">{a.author.name}</span>: {a.text_content || '📹 Video argument'}
+              </p>
             </div>
           ))
         ) : (

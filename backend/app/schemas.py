@@ -58,6 +58,7 @@ class UserPeopleItem(BaseModel):
     name: str
     username: str
     city: Optional[str] = None
+    profile_image_url: Optional[str] = None
     current_team_artist: Optional[ArtistBrief] = None
     top5_items: list[Top5ItemPeople] = []
 

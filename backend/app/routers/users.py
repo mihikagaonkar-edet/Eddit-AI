@@ -1,11 +1,14 @@
+import uuid as uuid_lib
+from pathlib import Path
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from sqlalchemy import func
 from sqlalchemy.orm import Session, joinedload
 from thefuzz import fuzz, process
 
 from app.auth import get_current_user, get_optional_user
+from app.config import settings
 from app.database import get_db
 from app.models.artist import Artist
 from app.models.top5 import Top5Item, Top5List
@@ -24,6 +27,58 @@ from app.schemas import (
 from app.services import artist_to_brief, artist_to_detail, ensure_artist_teams, user_to_brief
 
 router = APIRouter(prefix="/api", tags=["users & artists"])
+
+ALLOWED_AVATAR_TYPES = {"image/jpeg", "image/png", "image/webp", "image/gif"}
+MAX_AVATAR_SIZE = 5 * 1024 * 1024
+
+
+def _delete_old_avatar(profile_image_url: str | None) -> None:
+    if not profile_image_url or not profile_image_url.startswith("/uploads/avatars/"):
+        return
+    old_path = Path(settings.upload_dir) / profile_image_url.removeprefix("/uploads/")
+    if old_path.is_file():
+        old_path.unlink()
+
+
+@router.post("/users/me/avatar", response_model=UserBrief)
+async def upload_profile_photo(
+    file: UploadFile = File(...),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    content_type = (file.content_type or "").split(";")[0].strip().lower()
+    if content_type not in ALLOWED_AVATAR_TYPES:
+        raise HTTPException(status_code=400, detail="Image must be JPEG, PNG, WebP, or GIF")
+
+    content = await file.read()
+    if len(content) > MAX_AVATAR_SIZE:
+        raise HTTPException(status_code=400, detail="Image must be 5MB or smaller")
+    if not content:
+        raise HTTPException(status_code=400, detail="Empty file")
+
+    ext_map = {
+        "image/jpeg": ".jpg",
+        "image/png": ".png",
+        "image/webp": ".webp",
+        "image/gif": ".gif",
+    }
+    ext = ext_map.get(content_type, Path(file.filename or "avatar.jpg").suffix or ".jpg")
+
+    upload_dir = Path(settings.upload_dir) / "avatars"
+    upload_dir.mkdir(parents=True, exist_ok=True)
+
+    filename = f"avatar_{uuid_lib.uuid4().hex}{ext}"
+    filepath = upload_dir / filename
+
+    _delete_old_avatar(current_user.profile_image_url)
+
+    with open(filepath, "wb") as f:
+        f.write(content)
+
+    current_user.profile_image_url = f"/uploads/avatars/{filename}"
+    db.commit()
+    db.refresh(current_user)
+    return user_to_brief(current_user)
 
 
 @router.get("/users/{username}", response_model=UserProfile)
@@ -89,6 +144,7 @@ def list_people(db: Session = Depends(get_db)):
                 name=user.name,
                 username=user.username,
                 city=user.city,
+                profile_image_url=user.profile_image_url,
                 current_team_artist=team,
                 top5_items=top5_items,
             )
