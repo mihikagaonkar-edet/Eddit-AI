@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { Top5Picker } from '../components/Top5Picker';
 import { ProfilePhotoField } from '../components/ProfilePhotoField';
+import { MusicAmbience } from '../components/music';
 import { api } from '../api/client';
 import type { Artist } from '../types';
 import { ArtistAvatar } from '../components/ArtistAvatar';
@@ -100,6 +101,7 @@ export function SignupPage() {
 
   return (
     <div className="auth-stage py-12">
+      <MusicAmbience variant="auth" />
       <div className="relative z-10 w-full max-w-md">
         <div className="text-center mb-8">
           <h1 className="font-headline text-6xl text-accent tracking-wide leading-none">EDDIT</h1>

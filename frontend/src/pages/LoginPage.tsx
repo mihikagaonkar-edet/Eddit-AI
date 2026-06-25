@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
+import { MusicAmbience } from '../components/music';
 
 export function LoginPage() {
   const [username, setUsername] = useState('');
@@ -27,6 +28,7 @@ export function LoginPage() {
 
   return (
     <div className="auth-stage">
+      <MusicAmbience variant="auth" />
       <motion.form
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}

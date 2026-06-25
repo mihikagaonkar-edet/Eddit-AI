@@ -29,7 +29,7 @@ export function UserAvatar({
       <img
         src={mediaUrl(profileImageUrl)}
         alt=""
-        className={`artist-avatar object-cover ${sizeClass} ${className}`}
+        className={`rounded-lg object-cover shrink-0 border border-white/20 ${sizeClass} ${className}`}
       />
     );
   }
@@ -50,7 +50,7 @@ export function UserAvatar({
 
   return (
     <div
-      className={`artist-avatar ${sizeClass} text-off-white ${className}`}
+      className={`rounded-lg flex items-center justify-center font-display shrink-0 text-off-white border border-white/20 ${sizeClass} ${className}`}
       style={{ background: avatarGradient(name) }}
     >
       {initial}

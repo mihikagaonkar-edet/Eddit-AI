@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { api } from '../api/client';
 import { ArtistAvatar } from '../components/ArtistAvatar';
 import { PersonCard } from '../components/PersonCard';
+import { MusicPulse } from '../components/music';
 import { useAuth } from '../context/AuthContext';
 import type { Artist, HomeFeed, UserPeopleItem } from '../types';
 
@@ -171,6 +172,11 @@ export function HomePage() {
     <div className="max-w-6xl mx-auto px-4 pt-6 pb-16 space-y-20">
       {/* 1. Hero */}
       <section className="relative stage-hero px-6 py-14 sm:px-10 sm:py-20 text-center">
+        <div className="stage-hero-lights" aria-hidden>
+          <div className="stage-hero-beam stage-hero-beam--1" />
+          <div className="stage-hero-beam stage-hero-beam--2" />
+          <div className="stage-hero-beam stage-hero-beam--3" />
+        </div>
         <div className="relative z-10">
           <p className="draft-label mb-3 flex items-center justify-center gap-2">
             <span className="live-dot" aria-hidden />
@@ -196,6 +202,7 @@ export function HomePage() {
           <p className="text-xs text-muted mt-6">
             New Eddit Ratings drop every Monday at 7 PM EST.
           </p>
+          <MusicPulse className="max-w-md mx-auto mt-8 opacity-80" />
         </div>
       </section>
 

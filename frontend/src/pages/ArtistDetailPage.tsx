@@ -28,14 +28,60 @@ export function ArtistDetailPage() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 pt-6 space-y-8 pb-8">
-      <div className="draft-card-hero p-6 flex items-center gap-4">
-        <ArtistAvatar name={artist.name} size="lg" />
-        <div>
-          <p className="draft-label mb-1">Artist</p>
-          <h1 className="font-headline text-5xl text-off-white leading-none">{artist.name}</h1>
-          {artist.rating != null && (
-            <p className="text-gold font-display text-2xl mt-1">★ {artist.rating}</p>
-          )}
+      <div className="artist-stage-hero">
+        <div className="artist-stage-beams" aria-hidden>
+          <div className="artist-beam artist-beam--1" />
+          <div className="artist-beam artist-beam--2" />
+          <div className="artist-beam artist-beam--3" />
+        </div>
+
+        <svg
+          className="artist-stage-crowd"
+          viewBox="0 0 600 60"
+          preserveAspectRatio="xMidYMax slice"
+          aria-hidden
+        >
+          <path
+            fill="currentColor"
+            d="M0,60 L0,34 C20,26 30,38 45,30 C60,22 68,35 82,28 C96,20 104,33 118,26
+               C132,18 140,32 155,24 C170,16 178,30 192,22 C206,14 214,28 228,20
+               C242,12 250,26 265,18 C280,10 288,24 302,16 C316,8 324,22 338,15
+               C352,7 360,21 374,14 C388,6 396,20 410,13 C424,5 432,19 446,12
+               C460,4 468,18 482,11 C496,3 504,17 518,10 C532,2 540,16 555,9
+               C570,1 578,15 600,8 L600,60 Z"
+          />
+        </svg>
+
+        <div className="relative z-10 flex items-center gap-5 p-6 sm:p-8">
+          <ArtistAvatar name={artist.name} size="xl" />
+          <div>
+            <p className="draft-label mb-1 flex items-center gap-2">
+              <span className="live-dot" aria-hidden />
+              Artist
+            </p>
+            <h1 className="font-headline text-5xl sm:text-6xl text-off-white leading-none">
+              {artist.name}
+            </h1>
+            {artist.rating != null && (
+              <p className="text-gold font-display text-2xl mt-2 flex items-center gap-1">
+                ★ <span>{artist.rating}</span>
+                <span className="text-muted text-xs ml-2">Eddit Rating</span>
+              </p>
+            )}
+          </div>
+        </div>
+
+        <div className="artist-stage-eq-strip" aria-hidden>
+          {Array.from({ length: 28 }).map((_, i) => (
+            <span
+              key={i}
+              className="artist-stage-eq-bar"
+              style={{
+                height: `${20 + Math.sin(i * 0.8) * 60 + 20}%`,
+                animationDelay: `${(i * 0.06).toFixed(2)}s`,
+              }}
+            />
+          ))}
         </div>
       </div>
 
@@ -66,7 +112,9 @@ export function ArtistDetailPage() {
               <p className="text-xs mt-1">{u.name}</p>
             </Link>
           ))}
-          {!stats.top_supporters.length && <p className="text-muted text-sm">No #1 placements yet</p>}
+          {!stats.top_supporters.length && (
+            <p className="text-muted text-sm">No #1 placements yet</p>
+          )}
         </div>
       </Section>
 

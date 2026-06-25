@@ -2,6 +2,7 @@ import { NavLink, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { SignOutButton } from './SignOutButton';
+import { MusicAmbience } from './music';
 
 const navItems = [
   { to: '/', label: 'Home', Icon: IconHome },
@@ -68,7 +69,7 @@ function IconProfile({ className }: { className?: string }) {
 
 export function BottomNav() {
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bottom-nav-stage md:hidden">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 bottom-nav-stage md:hidden relative">
       <div className="flex justify-around py-2">
         {navItems.map((item) => (
           <NavLink
@@ -94,7 +95,7 @@ export function Sidebar() {
   const { user } = useAuth();
 
   return (
-    <aside className="hidden md:flex md:w-60 md:flex-col md:fixed md:inset-y-0 sidebar-stage">
+    <aside className="hidden md:flex md:w-60 md:flex-col md:fixed md:inset-y-0 sidebar-stage relative z-[2]">
       <div className="p-6 border-b border-white/6">
         <div className="flex items-center gap-2">
           <span className="live-dot" aria-hidden />
@@ -147,9 +148,10 @@ export function Sidebar() {
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen relative">
+      <MusicAmbience variant="app" />
       <Sidebar />
-      <main className="md:ml-60 pb-24 md:pb-10">
+      <main className="md:ml-60 pb-24 md:pb-10 relative z-[1]">
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
