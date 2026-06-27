@@ -5,6 +5,7 @@ from app.models.team import ArtistTeam
 from app.models.argument import Argument, ArgumentVideo
 from app.models.video import Video
 from app.models.vote import ArtistVote
+from app.models.user_profile_vote import UserProfileVote
 
 __all__ = [
     "User",
@@ -16,4 +17,5 @@ __all__ = [
     "ArgumentVideo",
     "Video",
     "ArtistVote",
+    "UserProfileVote",
 ]

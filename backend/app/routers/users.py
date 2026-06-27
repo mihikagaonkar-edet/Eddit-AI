@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session, joinedload
 from thefuzz import fuzz, process
 
 from app.auth import get_current_user, get_optional_user
+from app.models.user_profile_vote import UserProfileVote
 from app.config import settings
 from app.database import get_db
 from app.models.artist import Artist
@@ -119,7 +120,10 @@ def join_team(
 
 
 @router.get("/people", response_model=list[UserPeopleItem])
-def list_people(db: Session = Depends(get_db)):
+def list_people(
+    current_user: User | None = Depends(get_optional_user),
+    db: Session = Depends(get_db),
+):
     users = (
         db.query(User)
         .options(
@@ -129,6 +133,34 @@ def list_people(db: Session = Depends(get_db)):
         .order_by(User.name)
         .all()
     )
+
+    # Fetch vote counts for all users (graceful fallback if table not yet migrated)
+    like_counts: dict = {}
+    dislike_counts: dict = {}
+    my_votes: dict = {}
+    try:
+        like_rows = (
+            db.query(UserProfileVote.target_user_id, func.count(UserProfileVote.id).label("cnt"))
+            .filter(UserProfileVote.vote_type == "like")
+            .group_by(UserProfileVote.target_user_id)
+            .all()
+        )
+        dislike_rows = (
+            db.query(UserProfileVote.target_user_id, func.count(UserProfileVote.id).label("cnt"))
+            .filter(UserProfileVote.vote_type == "dislike")
+            .group_by(UserProfileVote.target_user_id)
+            .all()
+        )
+        like_counts = {row.target_user_id: row.cnt for row in like_rows}
+        dislike_counts = {row.target_user_id: row.cnt for row in dislike_rows}
+        if current_user:
+            my_votes_q = db.query(UserProfileVote).filter(
+                UserProfileVote.voter_id == current_user.id
+            ).all()
+            my_votes = {v.target_user_id: v.vote_type for v in my_votes_q}
+    except Exception:
+        db.rollback()
+
     results = []
     for user in users:
         team = artist_to_brief(user.current_team_artist) if user.current_team_artist else None
@@ -138,6 +170,8 @@ def list_people(db: Session = Depends(get_db)):
                 top5_items.append(
                     Top5ItemPeople(position=item.position, artist=artist_to_brief(item.artist))
                 )
+        likes = like_counts.get(user.id, 0)
+        dislikes = dislike_counts.get(user.id, 0)
         results.append(
             UserPeopleItem(
                 id=user.id,
@@ -147,6 +181,9 @@ def list_people(db: Session = Depends(get_db)):
                 profile_image_url=user.profile_image_url,
                 current_team_artist=team,
                 top5_items=top5_items,
+                like_count=likes,
+                dislike_count=dislikes,
+                my_vote=my_votes.get(user.id),
             )
         )
     return results

@@ -25,6 +25,9 @@ export interface UserPeopleItem {
   profile_image_url?: string | null;
   current_team_artist?: Artist | null;
   top5_items: Top5ItemPeople[];
+  like_count: number;
+  dislike_count: number;
+  my_vote?: 'like' | 'dislike' | null;
 }
 
 export interface User {

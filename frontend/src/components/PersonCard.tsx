@@ -4,7 +4,21 @@ import { TeamBadge } from './TeamBadge';
 import { UserAvatar } from './UserAvatar';
 import type { UserPeopleItem } from '../types';
 
-export function PersonCard({ person }: { person: UserPeopleItem }) {
+function formatCount(n: number) {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1).replace(/\.0$/, '')}M`;
+  if (n >= 1_000) return `${(n / 1_000).toFixed(1).replace(/\.0$/, '')}K`;
+  return String(n);
+}
+
+interface Props {
+  person: UserPeopleItem;
+  onVote?: (userId: string, type: 'like' | 'dislike') => void;
+}
+
+export function PersonCard({ person, onVote }: Props) {
+  const isLit = person.my_vote === 'like';
+  const isCringe = person.my_vote === 'dislike';
+
   return (
     <motion.div whileHover={{ y: -4 }} transition={{ duration: 0.2 }}>
       <Link
@@ -53,6 +67,47 @@ export function PersonCard({ person }: { person: UserPeopleItem }) {
             <p className="text-muted text-xs leading-tight">No Top 5 yet</p>
           )}
         </div>
+
+        {onVote && (
+          <div
+            className="mt-3 pt-3 border-t border-white/8 flex items-center justify-center gap-4"
+            onClick={(e) => e.preventDefault()}
+          >
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onVote(person.id, 'like');
+              }}
+              className={`flex items-center gap-1 hover:opacity-80 transition-opacity ${
+                isLit ? 'text-gold' : 'text-accent'
+              }`}
+              aria-label={`Lit: ${person.like_count}`}
+            >
+              <span className="text-sm shrink-0" aria-hidden>🔥</span>
+              <span className="font-display text-sm tabular-nums">{formatCount(person.like_count)}</span>
+              <span className="text-[10px] text-accent/80 hidden sm:inline">Lit</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onVote(person.id, 'dislike');
+              }}
+              className={`flex items-center gap-1 hover:opacity-80 transition-opacity ${
+                isCringe ? 'text-gold' : 'text-accent'
+              }`}
+              aria-label={`Cringe: ${person.dislike_count}`}
+            >
+              <span className="text-sm shrink-0" aria-hidden>😬</span>
+              <span className="font-display text-sm tabular-nums">{formatCount(person.dislike_count)}</span>
+              <span className="text-[10px] text-accent/80 hidden sm:inline">Cringe</span>
+            </button>
+          </div>
+        )}
       </Link>
     </motion.div>
   );

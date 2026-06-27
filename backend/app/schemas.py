@@ -61,6 +61,9 @@ class UserPeopleItem(BaseModel):
     profile_image_url: Optional[str] = None
     current_team_artist: Optional[ArtistBrief] = None
     top5_items: list[Top5ItemPeople] = []
+    like_count: int = 0
+    dislike_count: int = 0
+    my_vote: Optional[Literal["like", "dislike"]] = None
 
 
 class RegisterRequest(BaseModel):

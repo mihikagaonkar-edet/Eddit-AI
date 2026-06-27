@@ -201,6 +201,12 @@ export const api = {
       method: 'POST',
       body: JSON.stringify({ top5_item_id, vote_type }),
     }),
+
+  voteUserProfile: (target_user_id: string, vote_type: 'like' | 'dislike') =>
+    request<{ message: string; my_vote: 'like' | 'dislike' | null }>('/api/profile-votes', {
+      method: 'POST',
+      body: JSON.stringify({ target_user_id, vote_type }),
+    }),
 };
 
 export function getApiBaseUrl(): string {
