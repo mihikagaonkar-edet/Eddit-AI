@@ -82,10 +82,22 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
     );
   });
   if (!res.ok) {
-    const err = await parseJsonResponse<{ detail?: string }>(res).catch((e) => ({
+    const err = await parseJsonResponse<{ detail?: unknown }>(res).catch((e) => ({
       detail: e instanceof Error ? e.message : res.statusText,
     }));
-    throw new Error(err.detail || 'Request failed');
+    const detail = err.detail;
+    let message: string;
+    if (typeof detail === 'string') {
+      message = detail;
+    } else if (Array.isArray(detail)) {
+      // FastAPI 422 validation errors: [{loc, msg, type}]
+      message = detail
+        .map((d) => (typeof d === 'object' && d !== null && 'msg' in d ? String((d as Record<string, unknown>).msg) : JSON.stringify(d)))
+        .join('; ');
+    } else {
+      message = 'Request failed';
+    }
+    throw new Error(message || 'Request failed');
   }
   const data = await parseJsonResponse<T>(res);
   return normalizeArtistNames(data) as T;

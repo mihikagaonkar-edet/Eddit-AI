@@ -43,6 +43,24 @@ export function SignupPage() {
   const handleAccount = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+
+    if (form.username.length < 3) {
+      setError('Username must be at least 3 characters.');
+      return;
+    }
+    if (/\s/.test(form.username)) {
+      setError('Username cannot contain spaces.');
+      return;
+    }
+    if (!/^[a-zA-Z0-9_]+$/.test(form.username)) {
+      setError('Username can only contain letters, numbers, and underscores.');
+      return;
+    }
+    if (form.password.length < 6) {
+      setError('Password must be at least 6 characters.');
+      return;
+    }
+
     setLoading(true);
     try {
       await register(form);
