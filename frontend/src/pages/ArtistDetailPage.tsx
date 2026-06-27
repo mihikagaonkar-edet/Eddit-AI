@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { api } from '../api/client';
 import { ArtistAvatar } from '../components/ArtistAvatar';
 import { UserAvatar } from '../components/UserAvatar';
+import { ArgumentThread } from '../components/ArgumentThread';
 import { useAuth } from '../context/AuthContext';
 
 function formatNumber(n?: number | null) {
@@ -118,25 +119,10 @@ export function ArtistDetailPage() {
         </div>
       </Section>
 
-      <Section title="Recent Reactions">
-        {stats.recent_arguments.length > 0 ? (
-          stats.recent_arguments.map((a) => (
-            <div key={a.id} className="draft-card-row p-3 mb-1.5 text-sm flex items-start gap-2">
-              <UserAvatar
-                name={a.author.name}
-                profileImageUrl={a.author.profile_image_url}
-                size="sm"
-                className="mt-0.5"
-              />
-              <p>
-                <span className="font-medium">{a.author.name}</span>: {a.text_content || '📹 Video reaction'}
-              </p>
-            </div>
-          ))
-        ) : (
-          <p className="text-muted text-sm">No reactions yet</p>
-        )}
-      </Section>
+      <section>
+        <p className="draft-label mb-3">Reactions</p>
+        <ArgumentThread targetType="artist" targetId={artist.id} />
+      </section>
 
       <Link
         to={user ? `/teams/${artist.id}` : '/login'}
