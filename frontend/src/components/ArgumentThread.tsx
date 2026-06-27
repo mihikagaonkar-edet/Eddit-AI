@@ -160,7 +160,7 @@ function ArgumentCard({
 }
 
 export function ArgumentThread({ targetType, targetId }: Props) {
-  const [open, setOpen] = useState(false);
+  const [composing, setComposing] = useState(false);
   const [text, setText] = useState('');
   const [showVideo, setShowVideo] = useState(false);
   const { user } = useAuth();
@@ -169,7 +169,6 @@ export function ArgumentThread({ targetType, targetId }: Props) {
   const { data: arguments_ = [] } = useQuery({
     queryKey: ['arguments', targetType, targetId],
     queryFn: () => api.getArguments(targetType, targetId),
-    enabled: open,
   });
 
   const createMutation = useMutation({
@@ -184,76 +183,77 @@ export function ArgumentThread({ targetType, targetId }: Props) {
       queryClient.invalidateQueries({ queryKey: ['arguments', targetType, targetId] });
       setText('');
       setShowVideo(false);
+      setComposing(false);
     },
   });
 
   return (
     <div>
-      <button
-        onClick={() => setOpen(!open)}
-        className="text-sm text-accent hover:text-accent-glow font-display tracking-wide"
-      >
-        {open ? 'Close Reactions' : 'React to this profile'}
-      </button>
+      {user ? (
+        <button
+          onClick={() => setComposing(!composing)}
+          className="text-sm text-accent hover:text-accent-glow font-display tracking-wide"
+        >
+          {composing ? 'Cancel' : 'React to this profile'}
+        </button>
+      ) : (
+        <p className="text-muted text-sm">
+          <Link to="/login" className="text-accent">Log in</Link> to react.
+        </p>
+      )}
 
       <AnimatePresence>
-        {open && (
+        {composing && user && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="mt-4 overflow-hidden"
+            className="mt-3 space-y-2 overflow-hidden"
           >
-            {user ? (
-              <div className="mb-4 space-y-2">
-                <textarea
-                  value={text}
-                  onChange={(e) => setText(e.target.value)}
-                  placeholder="Why is this ranking wrong?"
-                  className="w-full draft-card p-3 text-sm resize-none h-24 focus:outline-none focus:border-accent/40"
-                />
-                <div className="flex gap-2 flex-wrap">
-                  <button
-                    onClick={() => createMutation.mutate({ text })}
-                    disabled={!text.trim()}
-                    className="px-4 py-2 btn-primary text-sm disabled:opacity-40"
-                  >
-                    Post Argument
-                  </button>
-                  <button
-                    onClick={() => setShowVideo(!showVideo)}
-                    className="px-4 py-2 btn-ghost text-sm"
-                  >
-                    Video Argument
-                  </button>
-                </div>
-                {showVideo && (
-                  <VideoRecorder
-                    onCancel={() => setShowVideo(false)}
-                    onRecorded={async (blob, duration) => {
-                      const video = await api.uploadVideo(blob, duration);
-                      createMutation.mutate({ text: text || undefined, video_id: video.id });
-                    }}
-                  />
-                )}
-              </div>
-            ) : (
-              <p className="text-muted text-sm mb-4">
-                <Link to="/login" className="text-accent">Log in</Link> to react.
-              </p>
-            )}
-
-            {arguments_.map((arg) => (
-              <ArgumentCard
-                key={arg.id}
-                argument={arg}
-                targetType={targetType}
-                targetId={targetId}
+            <textarea
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              placeholder="Why is this ranking wrong?"
+              className="w-full draft-card p-3 text-sm resize-none h-24 focus:outline-none focus:border-accent/40"
+            />
+            <div className="flex gap-2 flex-wrap">
+              <button
+                onClick={() => createMutation.mutate({ text })}
+                disabled={!text.trim()}
+                className="px-4 py-2 btn-primary text-sm disabled:opacity-40"
+              >
+                Post Reaction
+              </button>
+              <button
+                onClick={() => setShowVideo(!showVideo)}
+                className="px-4 py-2 btn-ghost text-sm"
+              >
+                Video Reaction
+              </button>
+            </div>
+            {showVideo && (
+              <VideoRecorder
+                onCancel={() => setShowVideo(false)}
+                onRecorded={async (blob, duration) => {
+                  const video = await api.uploadVideo(blob, duration);
+                  createMutation.mutate({ text: text || undefined, video_id: video.id });
+                }}
               />
-            ))}
+            )}
           </motion.div>
         )}
       </AnimatePresence>
+
+      <div className="mt-4">
+        {arguments_.map((arg) => (
+          <ArgumentCard
+            key={arg.id}
+            argument={arg}
+            targetType={targetType}
+            targetId={targetId}
+          />
+        ))}
+      </div>
     </div>
   );
 }
