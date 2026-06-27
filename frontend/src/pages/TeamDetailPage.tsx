@@ -75,7 +75,7 @@ export function TeamDetailPage() {
         </div>
       )}
 
-      <Section title="Newest Members">
+      <Section title="Members">
         <div className="flex gap-3 flex-wrap">
           {team.newest_members.map((m) => (
             <Link key={m.id} to={`/profile/${m.username}`} className="text-center">
