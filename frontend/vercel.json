@@ -7,6 +7,10 @@
     {
       "source": "/uploads/:path*",
       "destination": "https://peaceful-analysis-production-04ac.up.railway.app/uploads/:path*"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ]
 }
