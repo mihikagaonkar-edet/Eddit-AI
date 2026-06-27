@@ -2,9 +2,11 @@ import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../api/client';
 import { PersonCard } from '../components/PersonCard';
+import { useAuth } from '../context/AuthContext';
 
 export function PeoplePage() {
   const [search, setSearch] = useState('');
+  const { user: currentUser } = useAuth();
 
   const { data: people = [], isLoading } = useQuery({
     queryKey: ['people'],
@@ -13,8 +15,9 @@ export function PeoplePage() {
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return people;
-    return people.filter(
+    const others = people.filter((p) => p.username !== currentUser?.username);
+    if (!q) return others;
+    return others.filter(
       (p) =>
         p.name.toLowerCase().includes(q) ||
         p.username.toLowerCase().includes(q) ||
