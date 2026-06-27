@@ -118,7 +118,7 @@ export function ArtistDetailPage() {
         </div>
       </Section>
 
-      <Section title="Recent Arguments">
+      <Section title="Recent Reactions">
         {stats.recent_arguments.length > 0 ? (
           stats.recent_arguments.map((a) => (
             <div key={a.id} className="draft-card-row p-3 mb-1.5 text-sm flex items-start gap-2">
@@ -129,12 +129,12 @@ export function ArtistDetailPage() {
                 className="mt-0.5"
               />
               <p>
-                <span className="font-medium">{a.author.name}</span>: {a.text_content || '📹 Video argument'}
+                <span className="font-medium">{a.author.name}</span>: {a.text_content || '📹 Video reaction'}
               </p>
             </div>
           ))
         ) : (
-          <p className="text-muted text-sm">No arguments yet</p>
+          <p className="text-muted text-sm">No reactions yet</p>
         )}
       </Section>
 

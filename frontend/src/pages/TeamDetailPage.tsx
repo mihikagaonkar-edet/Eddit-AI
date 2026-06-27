@@ -86,7 +86,7 @@ export function TeamDetailPage() {
         </div>
       </Section>
 
-      <Section title="Recent Arguments">
+      <Section title="Recent Reactions">
         {team.recent_arguments.length > 0 ? (
           team.recent_arguments.map((a) => (
             <div key={a.id} className="draft-card-row p-3 mb-1.5 text-sm flex items-start gap-2">
@@ -102,7 +102,7 @@ export function TeamDetailPage() {
             </div>
           ))
         ) : (
-          <p className="text-muted text-sm">No team arguments yet</p>
+          <p className="text-muted text-sm">No team reactions yet</p>
         )}
       </Section>
     </div>

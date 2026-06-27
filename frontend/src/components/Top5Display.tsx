@@ -81,7 +81,7 @@ function Top5Stats({
         <IconArgument className="shrink-0" />
         <span className="font-display text-sm tabular-nums">{formatCount(item.argument_count)}</span>
         <span className={`top5-stat-label hidden sm:inline ${isHero ? 'text-gold/80' : 'text-muted'}`}>
-          Arguments
+          Reactions
         </span>
       </button>
     </div>

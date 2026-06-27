@@ -95,7 +95,7 @@ function ArgumentCard({
           )}
           {user && (
             <button onClick={() => setReplying(!replying)} className="hover:text-accent">
-              Reply With Argument
+              Reply With Reaction
             </button>
           )}
         </div>
@@ -111,7 +111,7 @@ function ArgumentCard({
               <textarea
                 value={text}
                 onChange={(e) => setText(e.target.value)}
-                placeholder="Make your argument..."
+                placeholder="Make your reaction..."
                 className="w-full draft-card p-3 text-sm resize-none h-20 focus:outline-none focus:border-accent/40"
               />
               <div className="flex gap-2 flex-wrap">
@@ -120,13 +120,13 @@ function ArgumentCard({
                   disabled={!text.trim()}
                   className="px-4 py-2 btn-primary text-sm disabled:opacity-40"
                 >
-                  Post Argument
+                  Post Reaction
                 </button>
                 <button
                   onClick={() => setShowVideo(!showVideo)}
                   className="px-4 py-2 btn-ghost text-sm"
                 >
-                  Video Argument
+                  Video Reaction
                 </button>
               </div>
               {showVideo && (
@@ -193,7 +193,7 @@ export function ArgumentThread({ targetType, targetId }: Props) {
         onClick={() => setOpen(!open)}
         className="text-sm text-accent hover:text-accent-glow font-display tracking-wide"
       >
-        {open ? 'Close Debate' : 'Start Argument'}
+        {open ? 'Close Reactions' : 'React to this profile'}
       </button>
 
       <AnimatePresence>
@@ -239,7 +239,7 @@ export function ArgumentThread({ targetType, targetId }: Props) {
               </div>
             ) : (
               <p className="text-muted text-sm mb-4">
-                <Link to="/login" className="text-accent">Log in</Link> to make arguments.
+                <Link to="/login" className="text-accent">Log in</Link> to react.
               </p>
             )}
 

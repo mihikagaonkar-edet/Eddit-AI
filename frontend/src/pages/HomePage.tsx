@@ -330,8 +330,8 @@ export function HomePage() {
       {/* 6. Debate */}
       <section>
         <SectionHeader
-          label="Arguments"
-          title="Debate The Top 5"
+          label="Reactions"
+          title="React To The Top 5"
           description="Comment, like, dislike, and challenge other fans' lists."
         />
         <div className="space-y-3 mb-6">

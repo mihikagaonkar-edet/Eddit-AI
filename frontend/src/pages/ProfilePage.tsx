@@ -138,7 +138,7 @@ export function ProfilePage() {
       {arguingItem && (
         <section className="draft-card p-4">
           <p className="text-sm text-muted mb-2">
-            Arguing about <span className="text-off-white font-medium">#{arguingItem.position} {arguingItem.artist.name}</span>
+            Reacting to <span className="text-off-white font-medium">#{arguingItem.position} {arguingItem.artist.name}</span>
           </p>
           <ArgumentThread targetType="top5_item" targetId={arguingItem.id} />
           <button onClick={() => setArguingItem(null)} className="text-muted text-xs mt-2">Close</button>
@@ -147,7 +147,7 @@ export function ProfilePage() {
 
       {profile && (
         <section>
-          <p className="draft-label mb-3">Profile Arguments</p>
+          <p className="draft-label mb-3">Profile Reactions</p>
           <ArgumentThread targetType="profile" targetId={profile.id} />
         </section>
       )}
