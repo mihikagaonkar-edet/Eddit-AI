@@ -79,3 +79,18 @@ def create_argument(
     db.commit()
     argument = _load_argument_query(db).filter(Argument.id == argument.id).first()
     return argument_to_response(db, argument)
+
+
+@router.delete("/{argument_id}", status_code=204)
+def delete_argument(
+    argument_id: UUID,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    argument = db.query(Argument).filter(Argument.id == argument_id).first()
+    if not argument:
+        raise HTTPException(status_code=404, detail="Argument not found")
+    if argument.author_user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not your argument")
+    db.delete(argument)
+    db.commit()

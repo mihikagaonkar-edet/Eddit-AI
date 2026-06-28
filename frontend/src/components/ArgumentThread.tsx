@@ -29,6 +29,7 @@ function ArgumentCard({
   const [replying, setReplying] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
   const [text, setText] = useState('');
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
@@ -36,6 +37,24 @@ function ArgumentCard({
     queryKey: ['replies', argument.id],
     queryFn: () => api.getReplies(argument.id),
     enabled: expanded,
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: () => api.deleteArgument(argument.id),
+    onMutate: () => {
+      const listKey = argument.parent_argument_id
+        ? ['replies', argument.parent_argument_id]
+        : ['arguments', targetType, targetId];
+      queryClient.setQueryData<Argument[]>(listKey, (prev) =>
+        prev ? prev.filter((a) => a.id !== argument.id) : prev
+      );
+    },
+    onError: () => {
+      queryClient.invalidateQueries({ queryKey: ['arguments', targetType, targetId] });
+      if (argument.parent_argument_id) {
+        queryClient.invalidateQueries({ queryKey: ['replies', argument.parent_argument_id] });
+      }
+    },
   });
 
   const replyMutation = useMutation({
@@ -97,6 +116,49 @@ function ArgumentCard({
             <button onClick={() => setReplying(!replying)} className="hover:text-accent">
               Reply With Reaction
             </button>
+          )}
+          {user?.id === argument.author.id && (
+            <>
+              <button
+                onClick={() => setConfirmingDelete(true)}
+                disabled={deleteMutation.isPending}
+                className="hover:text-red-400 transition-colors disabled:opacity-40 ml-auto"
+              >
+                {deleteMutation.isPending ? 'Deleting…' : 'Delete'}
+              </button>
+              {confirmingDelete && (
+                <div
+                  className="fixed inset-0 z-50 flex items-center justify-center p-4"
+                  style={{ background: 'rgba(8, 7, 10, 0.75)', backdropFilter: 'blur(4px)' }}
+                  onClick={() => setConfirmingDelete(false)}
+                >
+                  <div
+                    className="draft-card p-6 w-full max-w-sm flex flex-col gap-4"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <div>
+                      <p className="draft-label mb-1">Confirm deletion</p>
+                      <h3 className="font-display text-xl tracking-wide">Delete this reaction?</h3>
+                      <p className="text-muted text-sm mt-1">This cannot be undone.</p>
+                    </div>
+                    <div className="flex gap-3">
+                      <button
+                        onClick={() => { setConfirmingDelete(false); deleteMutation.mutate(); }}
+                        className="flex-1 py-2.5 font-display tracking-wide text-sm uppercase bg-red-600 hover:bg-red-500 text-white rounded-lg transition-colors"
+                      >
+                        Delete
+                      </button>
+                      <button
+                        onClick={() => setConfirmingDelete(false)}
+                        className="flex-1 py-2.5 btn-ghost text-sm"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </div>
 

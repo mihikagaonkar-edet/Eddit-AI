@@ -162,6 +162,9 @@ export const api = {
   getReplies: (argumentId: string) =>
     request<import('../types').Argument[]>(`/api/arguments/${argumentId}/replies`),
 
+  deleteArgument: (argumentId: string) =>
+    request<void>(`/api/arguments/${argumentId}`, { method: 'DELETE' }),
+
   createArgument: (data: {
     target_type: string;
     target_id: string;
