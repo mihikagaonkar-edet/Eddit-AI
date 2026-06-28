@@ -1,8 +1,9 @@
 import { useParams } from 'react-router-dom';
+import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { api } from '../api/client';
+import { api, mediaUrl } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { UserAvatar } from '../components/UserAvatar';
 import { TeamPatch } from '../components/TeamPatch';
@@ -88,23 +89,52 @@ export function TeamDetailPage() {
 
       <Section title="Recent Reactions">
         {team.recent_arguments.length > 0 ? (
-          team.recent_arguments.map((a) => (
-            <div key={a.id} className="draft-card-row p-3 mb-1.5 text-sm flex items-start gap-2">
-              <UserAvatar
-                name={a.author.name}
-                profileImageUrl={a.author.profile_image_url}
-                size="sm"
-                className="mt-0.5"
-              />
-              <p>
-                <span className="font-medium">{a.author.name}</span>: {a.text_content || '📹 Video'}
-              </p>
-            </div>
-          ))
+          <div className="space-y-2">
+            {team.recent_arguments.map((a) => (
+              <ReactionCard key={a.id} argument={a} />
+            ))}
+          </div>
         ) : (
           <p className="text-muted text-sm">No team reactions yet</p>
         )}
       </Section>
+    </div>
+  );
+}
+
+function ReactionCard({ argument: a }: { argument: import('../types').Argument }) {
+  const [videoOpen, setVideoOpen] = useState(false);
+
+  return (
+    <div
+      className={`draft-card-row p-3 text-sm ${a.video ? 'cursor-pointer' : ''}`}
+      onClick={a.video ? () => setVideoOpen((v) => !v) : undefined}
+    >
+      <div className="flex items-center gap-2">
+        <UserAvatar name={a.author.name} profileImageUrl={a.author.profile_image_url} size="sm" className="shrink-0" />
+        <Link
+          to={`/profile/${a.author.username}`}
+          className="font-medium hover:text-accent transition-colors truncate"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {a.author.name}
+        </Link>
+        {a.video && (
+          <span className="ml-auto text-muted text-[10px] font-display tracking-wide uppercase shrink-0">
+            {videoOpen ? 'Hide ▲' : '▶ Video'}
+          </span>
+        )}
+      </div>
+      {a.text_content && <p className="text-off-white/90 mt-2">{a.text_content}</p>}
+      {a.video && videoOpen && (
+        <div className="mt-2" onClick={(e) => e.stopPropagation()}>
+          <video
+            src={mediaUrl(a.video.storage_path)}
+            controls
+            className="w-full rounded-lg max-h-56 object-cover"
+          />
+        </div>
+      )}
     </div>
   );
 }
