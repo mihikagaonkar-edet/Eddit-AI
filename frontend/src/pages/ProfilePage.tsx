@@ -115,7 +115,10 @@ export function ProfilePage() {
 
       <section>
         {editing && isOwnProfile ? (
-          <EditTop5 onDone={() => { setEditing(false); queryClient.invalidateQueries({ queryKey: ['top5', username] }); }} />
+          <EditTop5
+            initialItems={top5?.items ?? []}
+            onDone={() => { setEditing(false); queryClient.invalidateQueries({ queryKey: ['top5', username] }); }}
+          />
         ) : top5 && top5.items.length > 0 ? (
           <Top5Display
             items={top5.items}
@@ -155,8 +158,10 @@ export function ProfilePage() {
   );
 }
 
-function EditTop5({ onDone }: { onDone: () => void }) {
-  const [selected, setSelected] = useState<Map<number, Artist>>(new Map());
+function EditTop5({ initialItems, onDone }: { initialItems: import('../types').Top5Item[]; onDone: () => void }) {
+  const [selected, setSelected] = useState<Map<number, Artist>>(
+    () => new Map(initialItems.map((item) => [item.position, item.artist]))
+  );
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
