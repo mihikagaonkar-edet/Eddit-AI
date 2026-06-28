@@ -116,7 +116,7 @@ class TeamJoinRequest(BaseModel):
 
 
 class ArgumentCreate(BaseModel):
-    target_type: Literal["profile", "top5", "top5_item"]
+    target_type: Literal["profile", "top5", "top5_item", "artist"]
     target_id: UUID
     text_content: Optional[str] = None
     parent_argument_id: Optional[UUID] = None
