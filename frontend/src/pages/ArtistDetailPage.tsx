@@ -105,18 +105,29 @@ export function ArtistDetailPage() {
         </Section>
       )}
 
-      <Section title="Top Supporters">
-        <div className="flex gap-3 flex-wrap">
-          {stats.top_supporters.map((u) => (
-            <Link key={u.id} to={`/profile/${u.username}`} className="text-center">
-              <UserAvatar name={u.name} profileImageUrl={u.profile_image_url} size="md" />
-              <p className="text-xs mt-1">{u.name}</p>
-            </Link>
-          ))}
-          {!stats.top_supporters.length && (
-            <p className="text-muted text-sm">No #1 placements yet</p>
-          )}
-        </div>
+      <Section title="Recent Top 5 Placements">
+        {stats.recent_placements.length > 0 ? (
+          <div className="space-y-1.5">
+            {stats.recent_placements.map((p, i) => (
+              <Link
+                key={`${p.user.id}-${i}`}
+                to={`/profile/${p.user.username}`}
+                className="draft-card-row flex items-center gap-3 p-3 hover:border-accent/30 transition-colors"
+              >
+                <UserAvatar name={p.user.name} profileImageUrl={p.user.profile_image_url} size="sm" />
+                <div className="flex-1 min-w-0">
+                  <p className="font-display text-sm tracking-wide truncate">{p.user.name}</p>
+                  <p className="text-muted text-xs">@{p.user.username}</p>
+                </div>
+                <span className={`rank-num text-xl shrink-0 ${p.position === 1 ? 'text-gold' : 'text-muted'}`}>
+                  #{p.position}
+                </span>
+              </Link>
+            ))}
+          </div>
+        ) : (
+          <p className="text-muted text-sm">No Top 5 placements yet</p>
+        )}
       </Section>
 
       <section>

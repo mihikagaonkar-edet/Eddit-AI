@@ -110,13 +110,14 @@ def artist_page_stats(artist_id: UUID, db: Session = Depends(get_db)):
 
     from app.models.top5 import Top5List
 
-    top_supporters = (
-        db.query(User)
+    recent_placements_rows = (
+        db.query(User, Top5Item.position, Top5Item.updated_at)
         .options(joinedload(User.current_team_artist))
         .join(Top5List, Top5List.user_id == User.id)
         .join(Top5Item, Top5Item.top5_list_id == Top5List.id)
-        .filter(Top5Item.artist_id == artist_id, Top5Item.position == 1)
-        .limit(8)
+        .filter(Top5Item.artist_id == artist_id)
+        .order_by(Top5Item.updated_at.desc())
+        .limit(10)
         .all()
     )
 
@@ -161,7 +162,10 @@ def artist_page_stats(artist_id: UUID, db: Session = Depends(get_db)):
         "artist": artist_to_detail(artist),
         "team_member_count": member_count,
         "most_common_position": most_common_position,
-        "top_supporters": [user_to_brief(u) for u in top_supporters],
+        "recent_placements": [
+            {"user": user_to_brief(u), "position": pos, "placed_at": placed_at.isoformat()}
+            for u, pos, placed_at in recent_placements_rows
+        ],
         "recent_arguments": [argument_to_response(db, a) for a in recent_args],
         "most_liked_placements": [
             {"position": item.position, "vote_count": cnt} for item, cnt in liked_items

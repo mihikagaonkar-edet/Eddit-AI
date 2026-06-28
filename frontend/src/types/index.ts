@@ -99,11 +99,17 @@ export interface TeamStats {
   team_rank?: number | null;
 }
 
+export interface RecentPlacement {
+  user: User;
+  position: number;
+  placed_at: string;
+}
+
 export interface ArtistStats {
   artist: Artist;
   team_member_count: number;
   most_common_position?: number | null;
-  top_supporters: User[];
+  recent_placements: RecentPlacement[];
   recent_arguments: Argument[];
   most_liked_placements: { position: number; vote_count: number }[];
   most_disliked_placements: { position: number; vote_count: number }[];
