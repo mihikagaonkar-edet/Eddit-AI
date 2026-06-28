@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQueries, useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
@@ -199,9 +199,9 @@ export function HomePage() {
               Browse Artists
             </Link>
           </div>
-          <p className="text-xs text-muted mt-6">
-            New Eddit Ratings drop every Monday at 7 PM EST.
-          </p>
+          <div className="mt-6">
+            <RatingsCountdown />
+          </div>
           <MusicPulse className="max-w-md mx-auto mt-8 opacity-80" />
         </div>
       </section>
@@ -349,4 +349,85 @@ export function HomePage() {
       </section>
     </div>
   );
+}
+
+function getNextMonday7pmEST(): Date {
+  // Get current time in EST (UTC-5) / EDT (UTC-4)
+  // Use a fixed UTC-5 offset; EST is UTC-5
+  const now = new Date();
+  // Convert to EST: UTC-5
+  const estOffset = -5 * 60; // minutes
+  const utcMinutes = now.getTime() / 60000 + now.getTimezoneOffset();
+  const estNow = new Date((utcMinutes + estOffset) * 60000);
+
+  const day = estNow.getDay(); // 0=Sun, 1=Mon
+  const daysUntilMonday = day === 1 ? 7 : (8 - day) % 7 || 7;
+
+  const next = new Date(estNow);
+  next.setDate(estNow.getDate() + daysUntilMonday);
+  next.setHours(19, 0, 0, 0);
+
+  // If today is Monday and it's before 7 PM EST, use today
+  if (day === 1 && estNow.getHours() < 19) {
+    next.setDate(estNow.getDate());
+  }
+
+  // Convert back to UTC ms
+  return new Date((next.getTime() / 60000 - estOffset + 0) * 60000 - now.getTimezoneOffset() * 60000);
+}
+
+function useCountdown(target: Date) {
+  const [remaining, setRemaining] = useState(() => Math.max(0, target.getTime() - Date.now()));
+
+  useEffect(() => {
+    const tick = () => setRemaining(Math.max(0, target.getTime() - Date.now()));
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [target]);
+
+  const total = Math.floor(remaining / 1000);
+  const d = Math.floor(total / 86400);
+  const h = Math.floor((total % 86400) / 3600);
+  const m = Math.floor((total % 3600) / 60);
+  const s = total % 60;
+  return { d, h, m, s, done: remaining === 0 };
+}
+
+function RatingsCountdown() {
+  const target = useMemo(() => getNextMonday7pmEST(), []);
+  const { d, h, m, s, done } = useCountdown(target);
+
+  return (
+    <div className="text-center">
+      <p className="text-xs text-muted mb-3">New Eddit Ratings drop every Monday at 7 PM EST</p>
+      {done ? (
+        <p className="font-display text-sm tracking-widest text-gold uppercase">Ratings updating now…</p>
+      ) : (
+        <div className="inline-flex items-center gap-1">
+          {d > 0 && <CountUnit value={d} label="d" />}
+          <CountUnit value={h} label="h" />
+          <Colon />
+          <CountUnit value={m} label="m" />
+          <Colon />
+          <CountUnit value={s} label="s" />
+        </div>
+      )}
+    </div>
+  );
+}
+
+function CountUnit({ value, label }: { value: number; label: string }) {
+  return (
+    <div className="flex flex-col items-center w-10">
+      <span className="font-headline text-2xl text-off-white leading-none tabular-nums">
+        {String(value).padStart(2, '0')}
+      </span>
+      <span className="text-[9px] font-display tracking-[0.2em] text-muted uppercase mt-0.5">{label}</span>
+    </div>
+  );
+}
+
+function Colon() {
+  return <span className="font-headline text-xl text-muted mb-3">:</span>;
 }
