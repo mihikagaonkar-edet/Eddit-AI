@@ -75,7 +75,7 @@ export function ArtistsPage() {
                 to={`/artists/${artist.id}`}
                 className="artist-grid-card p-4 flex flex-col items-center text-center gap-3"
               >
-                <ArtistAvatar name={artist.name} size="lg" />
+                <ArtistAvatar name={artist.name} imageUrl={artist.image_url} size="lg" />
                 <p className="font-display text-base tracking-wide text-off-white">{artist.name}</p>
                 {artist.rating != null && (
                   <p className="text-gold text-xs">★ {artist.rating}</p>

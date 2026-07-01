@@ -6,10 +6,12 @@ const NOTES = ['♪', '♫', '♩', '♬'];
 
 export function ArtistAvatar({
   name,
+  imageUrl,
   size = 'md',
   className = '',
 }: {
   name: string;
+  imageUrl?: string | null;
   size?: 'sm' | 'md' | 'lg' | 'xl';
   className?: string;
 }) {
@@ -34,7 +36,16 @@ export function ArtistAvatar({
         className="artist-avatar"
         style={{ background: avatarGradient(displayName), width: '100%', height: '100%' }}
       >
-        <span className="relative z-[1]">{displayName[0]?.toUpperCase() || '♪'}</span>
+        {imageUrl ? (
+          <img
+            src={imageUrl}
+            alt={displayName}
+            className="absolute inset-0 w-full h-full object-cover rounded-full z-[1]"
+            onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
+          />
+        ) : (
+          <span className="relative z-[1]">{displayName[0]?.toUpperCase() || '♪'}</span>
+        )}
 
         {showDecor && (
           <div className="artist-avatar-eq" aria-hidden>

@@ -2,6 +2,7 @@ export interface Artist {
   id: string;
   name: string;
   rating?: number | null;
+  image_url?: string | null;
   billboard_top_10?: number | null;
   billboard_number_1?: number | null;
   albums_sold?: number | null;

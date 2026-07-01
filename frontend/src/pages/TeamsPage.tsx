@@ -87,7 +87,7 @@ export function TeamsPage() {
                   ) : (
                     <span className="w-8 shrink-0" />
                   )}
-                  <ArtistAvatar name={team.name} size="lg" />
+                  <ArtistAvatar name={team.name} imageUrl={team.image_url} size="lg" />
                   <div className="flex-1 min-w-0">
                     <p className="font-display text-xl text-accent tracking-wide">Team {team.name}</p>
                     {team.rating != null && (

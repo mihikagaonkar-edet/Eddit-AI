@@ -255,7 +255,7 @@ export function HomePage() {
               const fanCount = stats?.member_count;
               return (
                 <div key={team.id} className="team-war-card">
-                  <ArtistAvatar name={team.name} size="xl" />
+                  <ArtistAvatar name={team.name} imageUrl={team.image_url} size="xl" />
                   <p className="font-display text-lg text-accent mt-4 tracking-wide">
                     Team {team.name}
                   </p>
@@ -311,7 +311,7 @@ export function HomePage() {
                     <span className={`rank-num text-2xl w-8 shrink-0 ${i === 0 ? 'text-gold' : 'text-muted'}`}>
                       {i + 1}
                     </span>
-                    <ArtistAvatar name={artist.name} size="md" />
+                    <ArtistAvatar name={artist.name} imageUrl={artist.image_url} size="md" />
                     <span className="font-serif text-lg sm:text-xl truncate">{artist.name}</span>
                   </div>
                   <span className="rank-num text-3xl sm:text-4xl text-gold tabular-nums shrink-0 ml-3">

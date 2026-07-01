@@ -11,6 +11,7 @@ class ArtistBrief(BaseModel):
     id: UUID
     name: str
     rating: Optional[float] = None
+    image_url: Optional[str] = None
 
     @field_validator("name")
     @classmethod

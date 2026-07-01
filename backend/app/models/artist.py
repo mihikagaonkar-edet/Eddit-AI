@@ -13,6 +13,7 @@ class Artist(Base):
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     name: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
+    image_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
     billboard_top_10: Mapped[int | None] = mapped_column(Integer, nullable=True)
     billboard_number_1: Mapped[int | None] = mapped_column(Integer, nullable=True)
     albums_sold: Mapped[int | None] = mapped_column(BigInteger, nullable=True)

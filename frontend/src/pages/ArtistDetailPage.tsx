@@ -54,7 +54,7 @@ export function ArtistDetailPage() {
         </svg>
 
         <div className="relative z-10 flex items-center gap-5 p-6 sm:p-8">
-          <ArtistAvatar name={artist.name} size="xl" />
+          <ArtistAvatar name={artist.name} imageUrl={artist.image_url} size="xl" />
           <div>
             <p className="draft-label mb-1 flex items-center gap-2">
               <span className="live-dot" aria-hidden />

@@ -43,19 +43,19 @@ export function RankingsPage() {
 
       <Leaderboard
         title="Top Teams"
-        items={data.top_teams.map((a) => ({ id: a.id, name: `Team ${a.name}`, sub: ratingSub(a), link: `/teams/${a.id}` }))}
+        items={data.top_teams.map((a) => ({ id: a.id, name: `Team ${a.name}`, sub: ratingSub(a), link: `/teams/${a.id}`, imageUrl: a.image_url }))}
       />
       <Leaderboard
         title="Most Debated"
-        items={data.most_debated_artists.map((a) => ({ id: a.id, name: a.name, sub: 'Hot debate', link: `/artists/${a.id}` }))}
+        items={data.most_debated_artists.map((a) => ({ id: a.id, name: a.name, sub: 'Hot debate', link: `/artists/${a.id}`, imageUrl: a.image_url }))}
       />
       <Leaderboard
         title="Most Liked"
-        items={data.most_liked_artists.slice(0, 5).map((a) => ({ id: a.id, name: a.name, sub: '👍 Fan favorite', link: `/artists/${a.id}` }))}
+        items={data.most_liked_artists.slice(0, 5).map((a) => ({ id: a.id, name: a.name, sub: '👍 Fan favorite', link: `/artists/${a.id}`, imageUrl: a.image_url }))}
       />
       <Leaderboard
         title="Most Disliked"
-        items={data.most_disliked_artists.map((a) => ({ id: a.id, name: a.name, sub: '👎 Controversial', link: `/artists/${a.id}` }))}
+        items={data.most_disliked_artists.map((a) => ({ id: a.id, name: a.name, sub: '👎 Controversial', link: `/artists/${a.id}`, imageUrl: a.image_url }))}
       />
 
       <section>
@@ -176,7 +176,7 @@ function ArtistCompareCard({
           </span>
 
           <div className="my-2">
-            <ArtistAvatar name={artist.name} size="lg" />
+            <ArtistAvatar name={artist.name} imageUrl={artist.image_url} size="lg" />
           </div>
 
           <span className="font-display text-[11px] tracking-wide text-center line-clamp-2 hover:text-accent transition-colors leading-tight">
@@ -268,7 +268,7 @@ function ArtistPicker({
               onClick={() => onSelect(a)}
               className="w-full flex items-center gap-2 px-2 py-1.5 hover:bg-white/5 transition-colors text-left"
             >
-              <ArtistAvatar name={a.name} size="sm" />
+              <ArtistAvatar name={a.name} imageUrl={a.image_url} size="sm" />
               <div className="min-w-0">
                 <p className="font-display text-[10px] tracking-wide truncate">{a.name}</p>
                 {a.rating != null && (
@@ -288,7 +288,7 @@ function Leaderboard({
   items,
 }: {
   title: string;
-  items: { id: string; name: string; sub: string; link: string }[];
+  items: { id: string; name: string; sub: string; link: string; imageUrl?: string | null }[];
 }) {
   return (
     <section>
@@ -305,7 +305,7 @@ function Leaderboard({
             <span className={`rank-num text-3xl w-10 shrink-0 ${i === 0 ? 'text-gold' : 'text-muted'}`}>
               {i + 1}
             </span>
-            <ArtistAvatar name={item.name.replace(/^Team /, '')} size="sm" />
+            <ArtistAvatar name={item.name.replace(/^Team /, '')} imageUrl={item.imageUrl} size="sm" />
             <div className="min-w-0">
               <p className="font-display text-base tracking-wide truncate">{item.name}</p>
               {item.sub && <p className="text-muted text-xs">{item.sub}</p>}

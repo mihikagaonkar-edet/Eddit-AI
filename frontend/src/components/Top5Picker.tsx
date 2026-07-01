@@ -64,7 +64,7 @@ export function Top5Picker({ selected, onChange }: Props) {
               </div>
               {artist ? (
                 <>
-                  <ArtistAvatar name={artist.name} size="sm" />
+                  <ArtistAvatar name={artist.name} imageUrl={artist.image_url} size="sm" />
                   <p className="font-display text-base tracking-wide flex-1 truncate">{artist.name}</p>
                   <button
                     type="button"
@@ -106,7 +106,7 @@ export function Top5Picker({ selected, onChange }: Props) {
                 : 'draft-card-row hover:border-accent/30'
             }`}
           >
-            <ArtistAvatar name={artist.name} size="sm" />
+            <ArtistAvatar name={artist.name} imageUrl={artist.image_url} size="sm" />
             <span className="truncate">{artist.name}</span>
           </button>
         ))}
