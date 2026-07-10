@@ -99,6 +99,9 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
     }
     throw new Error(message || 'Request failed');
   }
+  if (res.status === 204 || res.headers.get('content-length') === '0') {
+    return undefined as T;
+  }
   const data = await parseJsonResponse<T>(res);
   return normalizeArtistNames(data) as T;
 }
@@ -221,6 +224,18 @@ export const api = {
     request<{ message: string; my_vote: 'like' | 'dislike' | null }>('/api/profile-votes', {
       method: 'POST',
       body: JSON.stringify({ target_user_id, vote_type }),
+    }),
+
+  forgotPassword: (email: string) =>
+    request<void>('/api/auth/forgot-password', {
+      method: 'POST',
+      body: JSON.stringify({ email }),
+    }),
+
+  resetPassword: (token: string, new_password: string) =>
+    request<void>('/api/auth/reset-password', {
+      method: 'POST',
+      body: JSON.stringify({ token, new_password }),
     }),
 };
 

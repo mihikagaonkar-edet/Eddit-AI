@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from app.config import settings
+from app.models import password_reset  # noqa: F401 — registers model with Base
 from app.routers import arguments, auth, feed, profile_votes, teams, top5, users, videos, votes
 
 app = FastAPI(title="Eddit AI", version="0.1.0")

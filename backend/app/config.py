@@ -14,6 +14,12 @@ class Settings(BaseSettings):
     cors_allow_railway: bool = True
     cors_allow_vercel: bool = True
 
+    smtp_host: str = "smtp.gmail.com"
+    smtp_port: int = 587
+    smtp_user: str = ""
+    smtp_password: str = ""
+    frontend_url: str = "http://localhost:5173"
+
     @field_validator("database_url", mode="before")
     @classmethod
     def normalize_database_url(cls, value: object) -> str:

@@ -1,9 +1,17 @@
+import hashlib
+import secrets
+from datetime import datetime, timedelta
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
+from pydantic import BaseModel, EmailStr
 from sqlalchemy.orm import Session, joinedload
 
 from app.auth import create_access_token, get_current_user, hash_password, verify_password
+from app.config import settings
 from app.database import get_db
+from app.email import send_password_reset_email
+from app.models.password_reset import PasswordResetToken
 from app.models.top5 import Top5List
 from app.models.user import User
 from app.schemas import RegisterRequest, TokenResponse, UserBrief
@@ -43,6 +51,73 @@ def login(form: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get
         raise HTTPException(status_code=401, detail="Invalid credentials")
     token = create_access_token({"sub": str(user.id)})
     return TokenResponse(access_token=token)
+
+
+class ForgotPasswordRequest(BaseModel):
+    email: EmailStr
+
+class ResetPasswordRequest(BaseModel):
+    token: str
+    new_password: str
+
+
+def _hash_token(token: str) -> str:
+    return hashlib.sha256(token.encode()).hexdigest()
+
+
+@router.post("/forgot-password", status_code=204)
+def forgot_password(data: ForgotPasswordRequest, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.email == data.email).first()
+    # Always return 204 — never reveal whether email exists
+    if not user:
+        print(f"[email] No user found for {data.email!r}", flush=True)
+        return
+
+    # Invalidate any existing unused tokens for this user
+    db.query(PasswordResetToken).filter(
+        PasswordResetToken.user_id == user.id,
+        PasswordResetToken.used == False,
+    ).delete()
+
+    raw_token = secrets.token_urlsafe(32)
+    reset_token = PasswordResetToken(
+        user_id=user.id,
+        token_hash=_hash_token(raw_token),
+        expires_at=datetime.utcnow() + timedelta(hours=1),
+    )
+    db.add(reset_token)
+    db.commit()
+
+    reset_url = f"{settings.frontend_url}/reset-password?token={raw_token}"
+    print(f"[email] Attempting send to {user.email} via {settings.smtp_host}:{settings.smtp_port} user={settings.smtp_user!r} password_set={bool(settings.smtp_password)}", flush=True)
+    try:
+        send_password_reset_email(user.email, reset_url)
+        print(f"[email] Sent successfully to {user.email}", flush=True)
+    except Exception as e:
+        import traceback
+        print(f"[email error] {type(e).__name__}: {e}", flush=True)
+        traceback.print_exc()
+
+
+@router.post("/reset-password", status_code=204)
+def reset_password(data: ResetPasswordRequest, db: Session = Depends(get_db)):
+    token_hash = _hash_token(data.token)
+    record = db.query(PasswordResetToken).filter(
+        PasswordResetToken.token_hash == token_hash,
+        PasswordResetToken.used == False,
+        PasswordResetToken.expires_at > datetime.utcnow(),
+    ).first()
+
+    if not record:
+        raise HTTPException(status_code=400, detail="Invalid or expired reset link")
+
+    user = db.query(User).filter(User.id == record.user_id).first()
+    if not user:
+        raise HTTPException(status_code=400, detail="Invalid or expired reset link")
+
+    user.password_hash = hash_password(data.new_password)
+    record.used = True
+    db.commit()
 
 
 @router.get("/me", response_model=UserBrief)
