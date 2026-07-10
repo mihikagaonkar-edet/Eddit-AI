@@ -30,8 +30,13 @@ def send_password_reset_email(to_email: str, reset_url: str) -> None:
     msg.attach(MIMEText(html, "html"))
 
     context = ssl.create_default_context()
-    with smtplib.SMTP(settings.smtp_host, settings.smtp_port) as server:
-        server.ehlo()
-        server.starttls(context=context)
-        server.login(settings.smtp_user, settings.smtp_password)
-        server.sendmail(FROM_EMAIL, to_email, msg.as_string())
+    if settings.smtp_port == 465:
+        with smtplib.SMTP_SSL(settings.smtp_host, settings.smtp_port, context=context) as server:
+            server.login(settings.smtp_user, settings.smtp_password)
+            server.sendmail(FROM_EMAIL, to_email, msg.as_string())
+    else:
+        with smtplib.SMTP(settings.smtp_host, settings.smtp_port) as server:
+            server.ehlo()
+            server.starttls(context=context)
+            server.login(settings.smtp_user, settings.smtp_password)
+            server.sendmail(FROM_EMAIL, to_email, msg.as_string())

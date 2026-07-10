@@ -2,7 +2,7 @@ import hashlib
 import secrets
 from datetime import datetime, timedelta
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel, EmailStr
 from sqlalchemy.orm import Session, joinedload
@@ -65,12 +65,22 @@ def _hash_token(token: str) -> str:
     return hashlib.sha256(token.encode()).hexdigest()
 
 
+def _send_reset_email_task(to_email: str, reset_url: str) -> None:
+    import traceback
+    print(f"[email] Attempting send to {to_email} via {settings.smtp_host}:{settings.smtp_port} user={settings.smtp_user!r} password_set={bool(settings.smtp_password)}", flush=True)
+    try:
+        send_password_reset_email(to_email, reset_url)
+        print(f"[email] Sent successfully to {to_email}", flush=True)
+    except Exception as e:
+        print(f"[email error] {type(e).__name__}: {e}", flush=True)
+        traceback.print_exc()
+
+
 @router.post("/forgot-password", status_code=204)
-def forgot_password(data: ForgotPasswordRequest, db: Session = Depends(get_db)):
+def forgot_password(data: ForgotPasswordRequest, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == data.email).first()
     # Always return 204 — never reveal whether email exists
     if not user:
-        print(f"[email] No user found for {data.email!r}", flush=True)
         return
 
     # Invalidate any existing unused tokens for this user
@@ -89,14 +99,7 @@ def forgot_password(data: ForgotPasswordRequest, db: Session = Depends(get_db)):
     db.commit()
 
     reset_url = f"{settings.frontend_url}/reset-password?token={raw_token}"
-    print(f"[email] Attempting send to {user.email} via {settings.smtp_host}:{settings.smtp_port} user={settings.smtp_user!r} password_set={bool(settings.smtp_password)}", flush=True)
-    try:
-        send_password_reset_email(user.email, reset_url)
-        print(f"[email] Sent successfully to {user.email}", flush=True)
-    except Exception as e:
-        import traceback
-        print(f"[email error] {type(e).__name__}: {e}", flush=True)
-        traceback.print_exc()
+    background_tasks.add_task(_send_reset_email_task, user.email, reset_url)
 
 
 @router.post("/reset-password", status_code=204)
