@@ -10,3 +10,4 @@ pydantic[email]>=2.11.0
 pydantic-settings>=2.6.1
 python-dotenv>=1.0.1
 thefuzz[speedup]>=0.22.1
+resend>=2.0.0
