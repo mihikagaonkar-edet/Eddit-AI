@@ -1,7 +1,12 @@
 """
 Sync artist metrics and ratings from CSV to the database.
 Updates existing rows in-place (matched by name, case-insensitive).
-Does NOT insert new artists or delete existing ones.
+By default does NOT insert new artists or delete existing ones.
+
+Pass --create-missing to also insert CSV artists that aren't in the database
+yet (each gets a new ArtistTeam too, matching scripts/import_artists.py).
+Intended for local use only - the default (update-only) behavior is what
+should run against prod, so review the "not found" list before opting in.
 
 Run locally against prod by setting DATABASE_URL to the Railway connection string:
 
@@ -10,12 +15,16 @@ Run locally against prod by setting DATABASE_URL to the Railway connection strin
 
 Or on Railway console:
     /opt/venv/bin/python3 scripts/sync_artists_from_csv.py
+
+To also insert artists missing from the database (local only):
+    python scripts/sync_artists_from_csv.py --create-missing
 """
 
 import csv
 import os
 import re
 import sys
+import uuid
 from pathlib import Path
 
 # Load .env only when running locally (Railway injects env vars directly)
@@ -31,6 +40,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from app.database import SessionLocal
 from app.models.artist import Artist
+from app.models.team import ArtistTeam
+from app.utils.names import format_artist_name
 
 CSV_PATH = Path(__file__).resolve().parents[1] / "data" / "artists.csv"
 
@@ -56,7 +67,7 @@ def parse_float(val):
     return parse_number(val)
 
 
-def main():
+def main(create_missing: bool = False):
     db = SessionLocal()
     try:
         # Build a lookup: lowercase name → Artist ORM object
@@ -66,13 +77,22 @@ def main():
         print(f"Loaded {len(artists_by_name)} artists from database.\n")
 
         updated = 0
+        created = 0
         not_found = []
 
         with open(CSV_PATH, newline="", encoding="utf-8") as f:
             for row in csv.DictReader(f):
                 csv_name = row["Artist Name"].strip()
                 artist = artists_by_name.get(csv_name.lower())
-                if artist is None:
+
+                if artist is None and create_missing:
+                    artist = Artist(id=uuid.uuid4(), name=format_artist_name(csv_name))
+                    db.add(artist)
+                    db.flush()
+                    db.add(ArtistTeam(artist_id=artist.id))
+                    created += 1
+                    print(f"  Created: {csv_name}")
+                elif artist is None:
                     not_found.append(csv_name)
                     continue
 
@@ -91,6 +111,8 @@ def main():
 
         db.commit()
         print(f"\nDone. {updated} artists synced to database.")
+        if created:
+            print(f"Created {created} new artist(s) that were missing from the database.")
         if not_found:
             print(f"Not found in DB ({len(not_found)}): {', '.join(not_found)}")
     except Exception as e:
@@ -101,4 +123,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main(create_missing="--create-missing" in sys.argv[1:])
