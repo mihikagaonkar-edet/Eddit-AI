@@ -9,8 +9,16 @@ Flow per artist:
   4. Download the image to uploads/artist_images/{artist_id}.jpg
   5. Store /uploads/artist_images/{artist_id}.jpg in artist.image_url
 
+By default only processes artists with no image_url yet (e.g. artists just
+added via sync_artists_from_csv.py --create-missing), so existing images are
+left untouched.
+
 Usage (from backend/ directory):
     python scripts/fetch_artist_images.py
+
+Pass --all to re-fetch and overwrite images for every artist, not just the
+ones missing one:
+    python scripts/fetch_artist_images.py --all
 
 Rate limits: MusicBrainz asks for max 1 req/sec; Cover Art Archive is more lenient.
 All data is CC0 / CC-licensed.
@@ -116,18 +124,24 @@ def download_image(remote_url: str, artist_id: str) -> str | None:
         return None
 
 
-def main():
+def main(refetch_all: bool = False):
     IMAGES_DIR.mkdir(parents=True, exist_ok=True)
 
     db = SessionLocal()
     try:
-        artists = db.query(Artist).order_by(Artist.name).all()
-        print(f"Found {len(artists)} artists. Clearing old images and fetching from MusicBrainz...\n")
+        query = db.query(Artist).order_by(Artist.name)
+        if not refetch_all:
+            query = query.filter(Artist.image_url.is_(None))
+        artists = query.all()
 
-        for artist in artists:
-            artist.image_url = None
-        db.commit()
-        print("Cleared existing images.\n")
+        if refetch_all:
+            print(f"Found {len(artists)} artists. Clearing old images and fetching from MusicBrainz...\n")
+            for artist in artists:
+                artist.image_url = None
+            db.commit()
+            print("Cleared existing images.\n")
+        else:
+            print(f"Found {len(artists)} artist(s) with no image yet. Fetching from MusicBrainz...\n")
 
         updated = 0
         for artist in artists:
@@ -151,4 +165,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main(refetch_all="--all" in sys.argv[1:])
