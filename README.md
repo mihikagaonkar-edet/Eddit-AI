@@ -85,6 +85,37 @@ name,billboard_top_10,billboard_number_1,albums_sold,singles_sold,avg_songs_per_
 
 Each imported artist automatically gets a team.
 
+To sync updated metrics/ratings from `backend/data/artists.csv` into an
+existing database (matches artists by name, case-insensitive; updates
+in-place without touching anything else in the DB):
+
+```bash
+# Local
+cd backend
+python scripts/sync_artists_from_csv.py
+
+# Railway console (backend service shell)
+DATABASE_URL="postgresql+psycopg://postgres:PASSWORD@HOST:PORT/railway" /opt/venv/bin/python3 scripts/sync_artists_from_csv.py --create-missing
+```
+
+Add `--create-missing` to also insert any CSV artists not yet in the
+database (each gets a team, same as `import_artists.py`). Recommended for
+local use only — review the script's "not found" output before running it
+against a shared/prod database.
+
+To fetch profile pictures for artists that don't have one yet (e.g. artists
+just added via `--create-missing`), pulling a cover image from MusicBrainz /
+the Cover Art Archive:
+
+```bash
+cd backend
+python scripts/fetch_artist_images.py
+```
+
+Add `--all` to re-fetch and overwrite images for every artist, not just the
+ones missing one. MusicBrainz rate-limits to 1 request/sec, so this takes
+roughly 2+ seconds per artist.
+
 ## Project Structure
 
 ```
