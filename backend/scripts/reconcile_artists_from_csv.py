@@ -84,11 +84,37 @@ def parse_float(val):
     return parse_number(val)
 
 
+def parse_singles_sold(val: str | None) -> tuple[int | None, bool]:
+    """Returns (value, uncapped). A trailing '+' (e.g. '100M+', '100+') means
+    the CSV source only knows the figure is at least this much. A bare
+    number before the '+' with no unit is assumed to be in millions,
+    matching every other value in this column."""
+    if not val or not str(val).strip():
+        return None, False
+    s = str(val).strip().replace(",", "")
+    uncapped = s.endswith("+")
+    if uncapped:
+        s = s[:-1].strip()
+
+    m = re.fullmatch(r"([\d.]+)\s*([kmb])", s, re.IGNORECASE)
+    if m:
+        n = float(m.group(1)) * _SUFFIX_MULTIPLIERS[m.group(2).lower()]
+    else:
+        try:
+            n = float(s)
+        except ValueError:
+            return None, uncapped
+        if uncapped:
+            n *= _SUFFIX_MULTIPLIERS["m"]
+
+    return int(n), uncapped
+
+
 def apply_csv_row(artist: Artist, row: dict) -> None:
     artist.billboard_top_10          = parse_int(row.get("Billboard top 10"))
     artist.billboard_number_1        = parse_int(row.get("Billboard #1"))
     artist.albums_sold               = parse_int(row.get("Albums sold"))
-    artist.singles_sold              = parse_int(row.get("Singles sold"))
+    artist.singles_sold, artist.singles_sold_uncapped = parse_singles_sold(row.get("Singles sold"))
     artist.avg_songs_per_year        = parse_float(row.get("Avg. song per yr"))
     artist.awards                    = parse_int(row.get("Awards"))
     artist.platinum_albums           = parse_int(row.get("Platinum Albums"))

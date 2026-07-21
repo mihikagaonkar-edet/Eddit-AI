@@ -83,6 +83,32 @@ def parse_float(val: str | None) -> float | None:
     return parse_number(val)
 
 
+def parse_singles_sold(val: str | None) -> tuple[int | None, bool]:
+    """Returns (value, uncapped). A trailing '+' (e.g. '100M+', '100+') means
+    the CSV source only knows the figure is at least this much. A bare
+    number before the '+' with no unit is assumed to be in millions,
+    matching every other value in this column."""
+    if not val or not str(val).strip():
+        return None, False
+    s = str(val).strip().replace(",", "").replace("$", "")
+    uncapped = s.endswith("+")
+    if uncapped:
+        s = s[:-1].strip()
+
+    match = re.fullmatch(r"([\d.]+)\s*([kmbt])", s, re.IGNORECASE)
+    if match:
+        n = float(match.group(1)) * _SUFFIX_MULTIPLIERS[match.group(2).lower()]
+    else:
+        try:
+            n = float(s)
+        except ValueError:
+            return None, uncapped
+        if uncapped:
+            n *= _SUFFIX_MULTIPLIERS["m"]
+
+    return int(n), uncapped
+
+
 def import_csv(path: str) -> None:
     db = SessionLocal()
     try:
@@ -92,13 +118,15 @@ def import_csv(path: str) -> None:
                 data = normalize_row(row)
                 if not data.get("name") or not str(data["name"]).strip():
                     continue
+                singles_sold, singles_sold_uncapped = parse_singles_sold(data.get("singles_sold"))
                 artist = Artist(
                     id=uuid.uuid4(),
                     name=format_artist_name(str(data["name"]).strip()),
                     billboard_top_10=parse_int(data.get("billboard_top_10")),
                     billboard_number_1=parse_int(data.get("billboard_number_1")),
                     albums_sold=parse_int(data.get("albums_sold")),
-                    singles_sold=parse_int(data.get("singles_sold")),
+                    singles_sold=singles_sold,
+                    singles_sold_uncapped=singles_sold_uncapped,
                     avg_songs_per_year=parse_float(data.get("avg_songs_per_year")),
                     awards=parse_int(data.get("awards")),
                     platinum_albums=parse_int(data.get("platinum_albums")),

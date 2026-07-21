@@ -27,6 +27,7 @@ class ArtistDetail(ArtistBrief):
     billboard_number_1: Optional[int] = None
     albums_sold: Optional[int] = None
     singles_sold: Optional[int] = None
+    singles_sold_uncapped: bool = False
     avg_songs_per_year: Optional[float] = None
     awards: Optional[int] = None
     platinum_albums: Optional[int] = None

@@ -7,6 +7,7 @@ export interface Artist {
   billboard_number_1?: number | null;
   albums_sold?: number | null;
   singles_sold?: number | null;
+  singles_sold_uncapped?: boolean;
   avg_songs_per_year?: number | null;
   awards?: number | null;
   platinum_albums?: number | null;

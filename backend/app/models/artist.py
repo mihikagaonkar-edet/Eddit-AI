@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import BigInteger, DateTime, Float, Integer, String
+from sqlalchemy import BigInteger, Boolean, DateTime, Float, Integer, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -18,6 +18,7 @@ class Artist(Base):
     billboard_number_1: Mapped[int | None] = mapped_column(Integer, nullable=True)
     albums_sold: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
     singles_sold: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
+    singles_sold_uncapped: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     avg_songs_per_year: Mapped[float | None] = mapped_column(Float, nullable=True)
     awards: Mapped[int | None] = mapped_column(Integer, nullable=True)
     platinum_albums: Mapped[int | None] = mapped_column(Integer, nullable=True)
