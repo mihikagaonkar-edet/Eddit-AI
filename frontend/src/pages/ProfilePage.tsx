@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { api } from '../api/client';
 import { Top5Display } from '../components/Top5Display';
 import { Top5Picker } from '../components/Top5Picker';
+import { ArtistAvatar } from '../components/ArtistAvatar';
 import { ArgumentThread } from '../components/ArgumentThread';
 import { SignOutButton } from '../components/SignOutButton';
 import { ShareProfileButton } from '../components/ShareProfileButton';
@@ -15,11 +16,12 @@ import type { Artist, Top5Item } from '../types';
 
 export function ProfilePage() {
   const { username: paramUsername } = useParams<{ username?: string }>();
-  const { user: currentUser } = useAuth();
+  const { user: currentUser, refreshUser } = useAuth();
   const username = paramUsername || currentUser?.username;
   const isOwnProfile = !paramUsername || paramUsername === currentUser?.username;
   const [searchParams, setSearchParams] = useSearchParams();
   const [editing, setEditing] = useState(false);
+  const [switchingTeam, setSwitchingTeam] = useState(false);
   const [arguingItem, setArguingItem] = useState<Top5Item | null>(null);
   const queryClient = useQueryClient();
 
@@ -97,6 +99,12 @@ export function ProfilePage() {
                     >
                       {editing ? 'Cancel' : 'Edit Top 5'}
                     </button>
+                    <button
+                      onClick={() => setSwitchingTeam(!switchingTeam)}
+                      className="text-xs font-semibold text-accent border-2 border-accent/40 px-3 py-1.5 rounded-lg hover:bg-accent/10"
+                    >
+                      {switchingTeam ? 'Cancel' : 'Change Team'}
+                    </button>
                     <SignOutButton compact className="md:hidden" />
                   </div>
                 )}
@@ -111,6 +119,20 @@ export function ProfilePage() {
             </div>
           </div>
         </header>
+      )}
+
+      {switchingTeam && isOwnProfile && (
+        <section>
+          <p className="draft-label mb-3">Change Team</p>
+          <ChangeTeam
+            currentArtistId={profile?.current_team_artist?.id}
+            onDone={async () => {
+              setSwitchingTeam(false);
+              await refreshUser();
+              queryClient.invalidateQueries({ queryKey: ['user', username] });
+            }}
+          />
+        </section>
       )}
 
       <section>
@@ -196,6 +218,62 @@ function EditTop5({ initialItems, onDone }: { initialItems: import('../types').T
       >
         {saving ? 'Saving...' : 'Save Top 5'}
       </button>
+    </div>
+  );
+}
+
+function ChangeTeam({ currentArtistId, onDone }: { currentArtistId?: string; onDone: () => void }) {
+  const [search, setSearch] = useState('');
+  const [error, setError] = useState('');
+  const { data: artists = [] } = useQuery({
+    queryKey: ['artists', 'all'],
+    queryFn: () => api.getArtists(0, 1000),
+  });
+
+  const switchMutation = useMutation({
+    mutationFn: (artistId: string) => api.joinTeam(artistId),
+    onSuccess: onDone,
+    onError: (e) => setError(e instanceof Error ? e.message : 'Failed to switch teams'),
+  });
+
+  const filtered = artists.filter((a) =>
+    a.name.toLowerCase().includes(search.toLowerCase())
+  );
+
+  return (
+    <div className="space-y-4">
+      <input
+        type="search"
+        placeholder="Search artists..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        className="w-full draft-card px-4 py-2.5 text-sm focus:outline-none focus:border-accent/40"
+      />
+
+      {error && <p className="text-red-400 text-sm">{error}</p>}
+
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 max-h-64 overflow-y-auto">
+        {filtered.map((artist) => {
+          const isCurrent = artist.id === currentArtistId;
+          return (
+            <button
+              key={artist.id}
+              type="button"
+              disabled={isCurrent || switchMutation.isPending}
+              onClick={() => { setError(''); switchMutation.mutate(artist.id); }}
+              className={`flex items-center gap-2 p-2 text-left text-sm transition-colors ${
+                isCurrent
+                  ? 'opacity-40 cursor-not-allowed draft-card'
+                  : 'draft-card-row hover:border-accent/30 disabled:opacity-40'
+              }`}
+            >
+              <ArtistAvatar name={artist.name} imageUrl={artist.image_url} size="sm" />
+              <span className="truncate">{artist.name}</span>
+              {isCurrent && <span className="text-muted text-xs ml-auto shrink-0">Current</span>}
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }
