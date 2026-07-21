@@ -156,9 +156,11 @@ function ArtistCompareCard({
   candidates: Artist[];
 }) {
   const stats = [
-    { label: 'Rating', value: artist.rating != null ? `★ ${artist.rating}` : null, gold: true },
-    { label: 'Spotify', value: artist.spotify_monthly_listeners != null ? fmtStat(artist.spotify_monthly_listeners) : null },
-    { label: 'YouTube', value: artist.youtube_views != null ? fmtStat(artist.youtube_views) : null },
+    { label: 'Albums Sold', value: artist.albums_sold != null ? fmtStat(artist.albums_sold) : null },
+    {
+      label: 'Singles Sold',
+      value: artist.singles_sold != null ? `${fmtStat(artist.singles_sold)}${artist.singles_sold_uncapped ? '+' : ''}` : null,
+    },
   ].filter((s) => s.value != null) as { label: string; value: string; gold?: boolean }[];
 
   return (
