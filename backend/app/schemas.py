@@ -29,6 +29,7 @@ class ArtistDetail(ArtistBrief):
     singles_sold: Optional[int] = None
     avg_songs_per_year: Optional[float] = None
     awards: Optional[int] = None
+    platinum_albums: Optional[int] = None
     youtube_views: Optional[int] = None
     spotify_monthly_listeners: Optional[int] = None
 

@@ -42,6 +42,7 @@ COLUMN_ALIASES: dict[str, str] = {
     "spotify listeners": "spotify_monthly_listeners",
     "spotify monthly listeners": "spotify_monthly_listeners",
     "eddit_rating": "rating",
+    "platinum albums": "platinum_albums",
 }
 
 
@@ -100,6 +101,7 @@ def import_csv(path: str) -> None:
                     singles_sold=parse_int(data.get("singles_sold")),
                     avg_songs_per_year=parse_float(data.get("avg_songs_per_year")),
                     awards=parse_int(data.get("awards")),
+                    platinum_albums=parse_int(data.get("platinum_albums")),
                     youtube_views=parse_int(data.get("youtube_views")),
                     spotify_monthly_listeners=parse_int(data.get("spotify_monthly_listeners")),
                     rating=parse_float(data.get("rating")),

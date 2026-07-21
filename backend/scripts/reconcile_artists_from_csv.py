@@ -91,6 +91,7 @@ def apply_csv_row(artist: Artist, row: dict) -> None:
     artist.singles_sold              = parse_int(row.get("Singles sold"))
     artist.avg_songs_per_year        = parse_float(row.get("Avg. song per yr"))
     artist.awards                    = parse_int(row.get("Awards"))
+    artist.platinum_albums           = parse_int(row.get("Platinum Albums"))
     artist.youtube_views             = parse_int(row.get("Youtube views"))
     artist.spotify_monthly_listeners = parse_int(row.get("Spotify listeners"))
     artist.rating                    = parse_float(row.get("Rating"))

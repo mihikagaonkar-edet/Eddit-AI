@@ -91,13 +91,6 @@ def artist_page_stats(artist_id: UUID, db: Session = Depends(get_db)):
     if not artist:
         raise HTTPException(status_code=404, detail="Artist not found")
 
-    member_count = (
-        db.query(func.count(User.id))
-        .filter(User.current_team_artist_id == artist_id)
-        .scalar()
-        or 0
-    )
-
     position_counts = (
         db.query(Top5Item.position, func.count(Top5Item.id))
         .filter(Top5Item.artist_id == artist_id)
@@ -160,7 +153,6 @@ def artist_page_stats(artist_id: UUID, db: Session = Depends(get_db)):
 
     return {
         "artist": artist_to_detail(artist),
-        "team_member_count": member_count,
         "most_common_position": most_common_position,
         "recent_placements": [
             {"user": user_to_brief(u), "position": pos, "placed_at": placed_at.isoformat()}

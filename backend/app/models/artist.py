@@ -20,6 +20,7 @@ class Artist(Base):
     singles_sold: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
     avg_songs_per_year: Mapped[float | None] = mapped_column(Float, nullable=True)
     awards: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    platinum_albums: Mapped[int | None] = mapped_column(Integer, nullable=True)
     youtube_views: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
     spotify_monthly_listeners: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
     rating: Mapped[float | None] = mapped_column(Float, nullable=True)
