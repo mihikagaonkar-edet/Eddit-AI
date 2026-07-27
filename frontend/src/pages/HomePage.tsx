@@ -2,12 +2,30 @@ import { useMemo, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQueries, useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { api } from '../api/client';
+import { api, mediaUrl } from '../api/client';
 import { ArtistAvatar } from '../components/ArtistAvatar';
 import { PersonCard } from '../components/PersonCard';
 import { MusicPulse } from '../components/music';
 import { useAuth } from '../context/AuthContext';
 import type { Artist, HomeFeed, UserPeopleItem } from '../types';
+
+// Module-scoped, not component state: survives client-side navigation away from
+// and back to the home page (so it doesn't replay), but resets on an actual page
+// reload (so a refresh does replay it) - since that's a fresh JS module load.
+let hasPlayedIntroSong = false;
+
+function useIntroSong() {
+  useEffect(() => {
+    if (hasPlayedIntroSong) return;
+    hasPlayedIntroSong = true;
+
+    const audio = new Audio(mediaUrl('/uploads/intro-song.mp3'));
+    audio.play().catch(() => {
+      // Browsers block audio autoplay until the user has interacted with the
+      // page at least once - nothing to do here, it just won't play that time.
+    });
+  }, []);
+}
 
 const FEATURED_TEAM_NAMES = ['Drake', 'Beyoncé', 'Taylor Swift', 'Eminem', 'Rihanna'];
 
@@ -96,6 +114,7 @@ function SectionHeader({
 
 export function HomePage() {
   const { user } = useAuth();
+  useIntroSong();
 
   const { data: home, isLoading: homeLoading } = useQuery({
     queryKey: ['home'],
