@@ -12,6 +12,7 @@ import { ProfilePhotoUpload } from '../components/ProfilePhotoUpload';
 import { UserAvatar } from '../components/UserAvatar';
 import { useAuth } from '../context/AuthContext';
 import { formatArtistName } from '../utils/formatArtistName';
+import { useMusicBrainzFallback } from '../hooks/useMusicBrainzFallback';
 import type { Artist, Top5Item } from '../types';
 
 export function ProfilePage() {
@@ -225,6 +226,8 @@ function EditTop5({ initialItems, onDone }: { initialItems: import('../types').T
 function ChangeTeam({ currentArtistId, onDone }: { currentArtistId?: string; onDone: () => void }) {
   const [search, setSearch] = useState('');
   const [error, setError] = useState('');
+  const [addingArtist, setAddingArtist] = useState(false);
+  const queryClient = useQueryClient();
   const { data: artists = [] } = useQuery({
     queryKey: ['artists', 'all'],
     queryFn: () => api.getArtists(0, 1000),
@@ -239,6 +242,25 @@ function ChangeTeam({ currentArtistId, onDone }: { currentArtistId?: string; onD
   const filtered = artists.filter((a) =>
     a.name.toLowerCase().includes(search.toLowerCase())
   );
+  const { candidate, loading: checkingMusicBrainz } = useMusicBrainzFallback(
+    search,
+    filtered.length > 0
+  );
+
+  const addFromMusicBrainz = async () => {
+    if (!candidate || addingArtist) return;
+    setAddingArtist(true);
+    setError('');
+    try {
+      const artist = await api.createArtistFromMusicBrainz(candidate.name, candidate.musicbrainz_id);
+      queryClient.invalidateQueries({ queryKey: ['artists'] });
+      switchMutation.mutate(artist.id);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Failed to add artist');
+    } finally {
+      setAddingArtist(false);
+    }
+  };
 
   return (
     <div className="space-y-4">
@@ -274,6 +296,30 @@ function ChangeTeam({ currentArtistId, onDone }: { currentArtistId?: string; onD
           );
         })}
       </div>
+
+      {filtered.length === 0 && search.trim().length >= 2 && (
+        <div className="draft-card p-3 text-center space-y-2">
+          {checkingMusicBrainz ? (
+            <p className="text-muted text-xs">Checking our records...</p>
+          ) : candidate ? (
+            <>
+              <p className="text-muted text-xs">
+                Not in our database yet <span className="text-off-white">{candidate.name}</span> is a real artist.
+              </p>
+              <button
+                type="button"
+                onClick={addFromMusicBrainz}
+                disabled={addingArtist || switchMutation.isPending}
+                className="text-accent text-sm font-semibold disabled:opacity-40"
+              >
+                {addingArtist || switchMutation.isPending ? 'Adding...' : `+ Add ${candidate.name} & join team`}
+              </button>
+            </>
+          ) : (
+            <p className="text-muted text-xs">No matching artist found</p>
+          )}
+        </div>
+      )}
     </div>
   );
 }

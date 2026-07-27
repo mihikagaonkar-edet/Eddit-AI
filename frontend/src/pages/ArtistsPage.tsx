@@ -1,8 +1,10 @@
 import { useMemo, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { api } from '../api/client';
 import { ArtistAvatar } from '../components/ArtistAvatar';
+import { useMusicBrainzFallback } from '../hooks/useMusicBrainzFallback';
+import { useAuth } from '../context/AuthContext';
 
 function ArtistCardWave() {
   return (
@@ -34,6 +36,10 @@ function ArtistCardWave() {
 
 export function ArtistsPage() {
   const [search, setSearch] = useState('');
+  const [addingArtist, setAddingArtist] = useState(false);
+  const [addError, setAddError] = useState('');
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
 
   const { data: artists = [], isLoading } = useQuery({
     queryKey: ['artists', 'all'],
@@ -45,6 +51,25 @@ export function ArtistsPage() {
     if (!q) return artists;
     return artists.filter((a) => a.name.toLowerCase().includes(q));
   }, [artists, search]);
+
+  const { candidate, loading: checkingMusicBrainz } = useMusicBrainzFallback(
+    search,
+    filtered.length > 0
+  );
+
+  const addFromMusicBrainz = async () => {
+    if (!candidate || addingArtist) return;
+    setAddingArtist(true);
+    setAddError('');
+    try {
+      await api.createArtistFromMusicBrainz(candidate.name, candidate.musicbrainz_id);
+      await queryClient.invalidateQueries({ queryKey: ['artists'] });
+    } catch (e) {
+      setAddError(e instanceof Error ? e.message : 'Failed to add artist');
+    } finally {
+      setAddingArtist(false);
+    }
+  };
 
   return (
     <div className="max-w-2xl mx-auto px-4 pt-6 space-y-6 pb-8">
@@ -85,7 +110,39 @@ export function ArtistsPage() {
             ))}
           </div>
           {filtered.length === 0 && (
-            <p className="text-muted text-center py-8">No artists found</p>
+            <div className="text-center py-8 space-y-3">
+              <p className="text-muted">No artists found</p>
+              {search.trim().length >= 2 && (
+                <div className="draft-card p-3 max-w-xs mx-auto space-y-2">
+                  {checkingMusicBrainz ? (
+                    <p className="text-muted text-xs">Checking our records...</p>
+                  ) : candidate ? (
+                    <>
+                      <p className="text-muted text-xs">
+                        Not in our database yet <span className="text-off-white">{candidate.name}</span> is a real artist.
+                      </p>
+                      {user ? (
+                        <button
+                          type="button"
+                          onClick={addFromMusicBrainz}
+                          disabled={addingArtist}
+                          className="text-accent text-sm font-semibold disabled:opacity-40"
+                        >
+                          {addingArtist ? 'Adding...' : `+ Add ${candidate.name}`}
+                        </button>
+                      ) : (
+                        <p className="text-muted text-xs">
+                          <Link to="/login" className="text-accent font-medium">Log in</Link> to add them
+                        </p>
+                      )}
+                      {addError && <p className="text-red-400 text-xs">{addError}</p>}
+                    </>
+                  ) : (
+                    <p className="text-muted text-xs">No matching artist found on MusicBrainz either</p>
+                  )}
+                </div>
+              )}
+            </div>
           )}
         </>
       )}

@@ -162,6 +162,21 @@ class SearchResults(BaseModel):
     teams: list[ArtistBrief]
 
 
+class MusicBrainzCandidate(BaseModel):
+    musicbrainz_id: str
+    name: str
+    score: int
+
+
+class MusicBrainzSearchResponse(BaseModel):
+    candidate: Optional[MusicBrainzCandidate] = None
+
+
+class CreateArtistFromMusicBrainzRequest(BaseModel):
+    name: str = Field(min_length=1, max_length=255)
+    musicbrainz_id: str
+
+
 class TeamStats(BaseModel):
     artist: ArtistDetail
     member_count: int

@@ -122,3 +122,9 @@ export interface SearchResults {
   users: User[];
   teams: Artist[];
 }
+
+export interface MusicBrainzCandidate {
+  musicbrainz_id: string;
+  name: string;
+  score: number;
+}

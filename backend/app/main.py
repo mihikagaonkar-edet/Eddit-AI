@@ -6,7 +6,18 @@ from fastapi.staticfiles import StaticFiles
 
 from app.config import settings
 from app.models import password_reset  # noqa: F401 — registers model with Base
-from app.routers import arguments, auth, feed, profile_votes, teams, top5, users, videos, votes
+from app.routers import (
+    arguments,
+    auth,
+    feed,
+    musicbrainz,
+    profile_votes,
+    teams,
+    top5,
+    users,
+    videos,
+    votes,
+)
 
 app = FastAPI(title="Eddit AI", version="0.1.0")
 
@@ -43,6 +54,7 @@ app.include_router(videos.router)
 app.include_router(votes.router)
 app.include_router(profile_votes.router)
 app.include_router(feed.router)
+app.include_router(musicbrainz.router)
 
 
 @app.get("/")

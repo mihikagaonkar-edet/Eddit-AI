@@ -157,6 +157,17 @@ export const api = {
 
   search: (q: string) =>     request<import('../types').SearchResults>(`/api/search?q=${encodeURIComponent(q)}`),
 
+  searchMusicBrainz: (q: string) =>
+    request<{ candidate: import('../types').MusicBrainzCandidate | null }>(
+      `/api/musicbrainz/search?q=${encodeURIComponent(q)}`
+    ),
+
+  createArtistFromMusicBrainz: (name: string, musicbrainz_id: string) =>
+    request<import('../types').Artist>('/api/artists/from-musicbrainz', {
+      method: 'POST',
+      body: JSON.stringify({ name, musicbrainz_id }),
+    }),
+
   getArguments: (target_type: string, target_id: string) =>
     request<import('../types').Argument[]>(
       `/api/arguments?target_type=${target_type}&target_id=${target_id}`

@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { api } from '../api/client';
 import type { Artist } from '../types';
 import { ArtistAvatar } from './ArtistAvatar';
+import { useMusicBrainzFallback } from '../hooks/useMusicBrainzFallback';
 
 interface Props {
   selected: Map<number, Artist>;
@@ -14,6 +15,8 @@ const rankSizes = ['text-4xl', 'text-3xl', 'text-2xl', 'text-xl', 'text-lg'];
 
 export function Top5Picker({ selected, onChange }: Props) {
   const [search, setSearch] = useState('');
+  const [addingArtist, setAddingArtist] = useState(false);
+  const queryClient = useQueryClient();
   const { data: artists = [] } = useQuery({
     queryKey: ['artists'],
     queryFn: () => api.getArtists(0, 100),
@@ -22,11 +25,29 @@ export function Top5Picker({ selected, onChange }: Props) {
   const filtered = artists.filter((a) =>
     a.name.toLowerCase().includes(search.toLowerCase())
   );
+  const { candidate, loading: checkingMusicBrainz } = useMusicBrainzFallback(
+    search,
+    filtered.length > 0
+  );
 
   const pick = (position: number, artist: Artist) => {
     const next = new Map(selected);
     next.set(position, artist);
     onChange(next);
+  };
+
+  const addFromMusicBrainz = async () => {
+    if (!candidate || addingArtist) return;
+    setAddingArtist(true);
+    try {
+      const artist = await api.createArtistFromMusicBrainz(candidate.name, candidate.musicbrainz_id);
+      queryClient.invalidateQueries({ queryKey: ['artists'] });
+      const nextPos = [1, 2, 3, 4, 5].find((p) => !selected.has(p));
+      if (nextPos) pick(nextPos, artist);
+      setSearch('');
+    } finally {
+      setAddingArtist(false);
+    }
   };
 
   const remove = (position: number) => {
@@ -101,6 +122,30 @@ export function Top5Picker({ selected, onChange }: Props) {
           </button>
         ))}
       </div>
+
+      {filtered.length === 0 && search.trim().length >= 2 && (
+        <div className="draft-card p-3 text-center space-y-2">
+          {checkingMusicBrainz ? (
+            <p className="text-muted text-xs">Checking our records...</p>
+          ) : candidate ? (
+            <>
+              <p className="text-muted text-xs">
+                Not in our database yet <span className="text-off-white">{candidate.name}</span> is a real artist.
+              </p>
+              <button
+                type="button"
+                onClick={addFromMusicBrainz}
+                disabled={addingArtist}
+                className="text-accent text-sm font-semibold disabled:opacity-40"
+              >
+                {addingArtist ? 'Adding...' : `+ Add ${candidate.name}`}
+              </button>
+            </>
+          ) : (
+            <p className="text-muted text-xs">No matching artist found</p>
+          )}
+        </div>
+      )}
 
       <p className="text-muted text-xs text-center">
         {selected.size}/5 selected — fills slots from #1 down
