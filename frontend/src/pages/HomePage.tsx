@@ -351,29 +351,64 @@ export function HomePage() {
   );
 }
 
+const NY_TIME_ZONE = 'America/New_York';
+
+/** How far America/New_York is from UTC, in minutes, at the given instant (DST-aware). */
+function nyOffsetMinutes(date: Date): number {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: NY_TIME_ZONE,
+    hour12: false,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+  }).formatToParts(date);
+
+  const get = (type: string) => Number(parts.find((p) => p.type === type)?.value);
+  const asUtc = Date.UTC(get('year'), get('month') - 1, get('day'), get('hour'), get('minute'), get('second'));
+  return Math.round((asUtc - date.getTime()) / 60000);
+}
+
 function getNextMonday7pmEST(): Date {
-  // Get current time in EST (UTC-5) / EDT (UTC-4)
-  // Use a fixed UTC-5 offset; EST is UTC-5
   const now = new Date();
-  // Convert to EST: UTC-5
-  const estOffset = -5 * 60; // minutes
-  const utcMinutes = now.getTime() / 60000 + now.getTimezoneOffset();
-  const estNow = new Date((utcMinutes + estOffset) * 60000);
 
-  const day = estNow.getDay(); // 0=Sun, 1=Mon
-  const daysUntilMonday = day === 1 ? 7 : (8 - day) % 7 || 7;
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: NY_TIME_ZONE,
+    weekday: 'short',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    hour12: false,
+  }).formatToParts(now);
+  const get = (type: string) => parts.find((p) => p.type === type)?.value ?? '';
 
-  const next = new Date(estNow);
-  next.setDate(estNow.getDate() + daysUntilMonday);
-  next.setHours(19, 0, 0, 0);
+  const weekdayIndex: Record<string, number> = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
+  const nyWeekday = weekdayIndex[get('weekday')];
+  const nyHour = Number(get('hour'));
 
-  // If today is Monday and it's before 7 PM EST, use today
-  if (day === 1 && estNow.getHours() < 19) {
-    next.setDate(estNow.getDate());
+  let daysUntilMonday = (1 - nyWeekday + 7) % 7;
+  if (daysUntilMonday === 0 && nyHour >= 19) {
+    daysUntilMonday = 7; // it's Monday but already past 7 PM - the next drop is a week away
   }
 
-  // Convert back to UTC ms
-  return new Date((next.getTime() / 60000 - estOffset + 0) * 60000 - now.getTimezoneOffset() * 60000);
+  // Land on the target NY calendar date, then resolve "19:00 that day in NY" to a
+  // real UTC instant using that date's actual DST offset (handles EST/EDT correctly).
+  const todayUtcMidnight = Date.UTC(Number(get('year')), Number(get('month')) - 1, Number(get('day')));
+  const targetDate = new Date(todayUtcMidnight + daysUntilMonday * 86_400_000);
+
+  const guess = Date.UTC(
+    targetDate.getUTCFullYear(),
+    targetDate.getUTCMonth(),
+    targetDate.getUTCDate(),
+    19,
+    0,
+    0
+  );
+  const offset = nyOffsetMinutes(new Date(guess));
+  return new Date(guess - offset * 60000);
 }
 
 function useCountdown(target: Date) {
