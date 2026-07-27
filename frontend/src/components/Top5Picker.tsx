@@ -23,13 +23,8 @@ export function Top5Picker({ selected, onChange }: Props) {
     a.name.toLowerCase().includes(search.toLowerCase())
   );
 
-  const selectedIds = new Set([...selected.values()].map((a) => a.id));
-
   const pick = (position: number, artist: Artist) => {
     const next = new Map(selected);
-    for (const [pos, a] of next) {
-      if (a.id === artist.id) next.delete(pos);
-    }
     next.set(position, artist);
     onChange(next);
   };
@@ -95,16 +90,11 @@ export function Top5Picker({ selected, onChange }: Props) {
           <button
             key={artist.id}
             type="button"
-            disabled={selectedIds.has(artist.id)}
             onClick={() => {
               const nextPos = [1, 2, 3, 4, 5].find((p) => !selected.has(p));
               if (nextPos) pick(nextPos, artist);
             }}
-            className={`flex items-center gap-2 p-2 text-left text-sm transition-colors ${
-              selectedIds.has(artist.id)
-                ? 'opacity-40 cursor-not-allowed draft-card'
-                : 'draft-card-row hover:border-accent/30'
-            }`}
+            className="flex items-center gap-2 p-2 text-left text-sm transition-colors draft-card-row hover:border-accent/30"
           >
             <ArtistAvatar name={artist.name} imageUrl={artist.image_url} size="sm" />
             <span className="truncate">{artist.name}</span>

@@ -44,10 +44,6 @@ def update_my_top5(
     if len(set(positions)) != 5:
         raise HTTPException(status_code=400, detail="Positions must be unique 1-5")
 
-    artist_ids = [item.artist_id for item in data.items]
-    if len(set(artist_ids)) != 5:
-        raise HTTPException(status_code=400, detail="Each artist can only appear once")
-
     top5 = db.query(Top5List).filter(Top5List.user_id == current_user.id).first()
     if not top5:
         top5 = Top5List(user_id=current_user.id)
