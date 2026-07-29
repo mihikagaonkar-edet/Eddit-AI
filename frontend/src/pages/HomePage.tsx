@@ -2,7 +2,7 @@ import { useMemo, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQueries, useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { api } from '../api/client';
+import { api, mediaUrl } from '../api/client';
 import { ArtistAvatar } from '../components/ArtistAvatar';
 import { PersonCard } from '../components/PersonCard';
 import { MusicPulse } from '../components/music';
@@ -19,7 +19,7 @@ function useIntroSong() {
     if (hasPlayedIntroSong) return;
     hasPlayedIntroSong = true;
 
-    const audio = new Audio('/intro-song.mp3');
+    const audio = new Audio(mediaUrl('/uploads/intro-song.mp3'));
     audio.play().catch(() => {
       // Browsers block audio autoplay until the user has interacted with the
       // page at least once - nothing to do here, it just won't play that time.

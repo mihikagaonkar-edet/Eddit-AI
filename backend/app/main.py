@@ -43,6 +43,18 @@ upload_path = Path(settings.upload_dir)
 upload_path.mkdir(parents=True, exist_ok=True)
 (upload_path / "videos").mkdir(parents=True, exist_ok=True)
 (upload_path / "avatars").mkdir(parents=True, exist_ok=True)
+
+# uploads/ is normally a persistent volume mount (e.g. on Railway), so anything
+# baked into the deployed image directly at this path would be shadowed once the
+# volume mounts over it. Instead, seed_assets/ ships in the image and gets copied
+# onto the volume once, on first boot - never overwriting a file already there.
+_seed_assets_dir = Path(__file__).resolve().parent / "seed_assets"
+if _seed_assets_dir.is_dir():
+    for seed_file in _seed_assets_dir.iterdir():
+        dest = upload_path / seed_file.name
+        if seed_file.is_file() and not dest.exists():
+            dest.write_bytes(seed_file.read_bytes())
+
 app.mount("/uploads", StaticFiles(directory=str(upload_path)), name="uploads")
 
 app.include_router(auth.router)
