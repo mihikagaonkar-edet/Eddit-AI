@@ -20,10 +20,29 @@ function useIntroSong() {
     hasPlayedIntroSong = true;
 
     const audio = new Audio(mediaUrl('/uploads/intro-song.mp3'));
-    audio.play().catch(() => {
-      // Browsers block audio autoplay until the user has interacted with the
-      // page at least once - nothing to do here, it just won't play that time.
-    });
+
+    // Browsers reject audio-with-sound autoplay until the user has interacted
+    // with the page at least once. If that's why this fails, fall back to
+    // playing on the visitor's first interaction with the home page instead -
+    // that's the one thing every browser always allows.
+    const retryOnInteraction = () => {
+      audio.play().catch(() => {});
+    };
+    const events = ['pointerdown', 'keydown'] as const;
+    events.forEach((e) => window.addEventListener(e, retryOnInteraction, { once: true }));
+
+    audio
+      .play()
+      .then(() => {
+        events.forEach((e) => window.removeEventListener(e, retryOnInteraction));
+      })
+      .catch(() => {
+        // Blocked - leave the interaction listeners in place to retry.
+      });
+
+    return () => {
+      events.forEach((e) => window.removeEventListener(e, retryOnInteraction));
+    };
   }, []);
 }
 
