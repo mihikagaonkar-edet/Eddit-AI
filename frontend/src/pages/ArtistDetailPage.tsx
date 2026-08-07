@@ -96,6 +96,7 @@ export function ArtistDetailPage() {
           value={`${formatNumber(artist.singles_sold)}${artist.singles_sold != null && artist.singles_sold_uncapped ? '+' : ''}`}
         />
         <Stat label="Platinum Albums" value={String(artist.platinum_albums ?? '—')} />
+        <Stat label="Experience" value={artist.experience ?? '—'} />
         <Stat label="Avg Songs / Year" value={artist.avg_songs_per_year != null ? String(artist.avg_songs_per_year) : '—'} />
         <Stat label="Spotify Listeners" value={formatNumber(artist.spotify_monthly_listeners)} />
         <Stat label="YouTube Views" value={formatNumber(artist.youtube_views)} />

@@ -43,6 +43,8 @@ COLUMN_ALIASES: dict[str, str] = {
     "spotify monthly listeners": "spotify_monthly_listeners",
     "eddit_rating": "rating",
     "platinum albums": "platinum_albums",
+    "experiece": "experience",  # matches the (misspelled) CSV header as-is
+    "experience": "experience",
 }
 
 
@@ -81,6 +83,12 @@ def parse_int(val: str | None) -> int | None:
 
 def parse_float(val: str | None) -> float | None:
     return parse_number(val)
+
+
+def parse_str(val: str | None) -> str | None:
+    if not val or not str(val).strip():
+        return None
+    return str(val).strip()
 
 
 def parse_singles_sold(val: str | None) -> tuple[int | None, bool]:
@@ -130,6 +138,7 @@ def import_csv(path: str) -> None:
                     avg_songs_per_year=parse_float(data.get("avg_songs_per_year")),
                     awards=parse_int(data.get("awards")),
                     platinum_albums=parse_int(data.get("platinum_albums")),
+                    experience=parse_str(data.get("experience")),
                     youtube_views=parse_int(data.get("youtube_views")),
                     spotify_monthly_listeners=parse_int(data.get("spotify_monthly_listeners")),
                     rating=parse_float(data.get("rating")),

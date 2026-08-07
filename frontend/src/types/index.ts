@@ -11,6 +11,7 @@ export interface Artist {
   avg_songs_per_year?: number | null;
   awards?: number | null;
   platinum_albums?: number | null;
+  experience?: string | null;
   youtube_views?: number | null;
   spotify_monthly_listeners?: number | null;
 }

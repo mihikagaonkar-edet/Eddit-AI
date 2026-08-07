@@ -66,6 +66,11 @@ def parse_int(val):
 def parse_float(val):
     return parse_number(val)
 
+def parse_str(val):
+    if not val or not str(val).strip():
+        return None
+    return str(val).strip()
+
 def parse_singles_sold(val: str | None) -> tuple[int | None, bool]:
     """Returns (value, uncapped). A trailing '+' (e.g. '100M+', '100+') means
     the CSV source only knows the figure is at least this much. A bare
@@ -128,6 +133,7 @@ def main(create_missing: bool = False):
                 artist.avg_songs_per_year        = parse_float(row.get("Avg. song per yr"))
                 artist.awards                    = parse_int(row.get("Awards"))
                 artist.platinum_albums           = parse_int(row.get("Platinum Albums"))
+                artist.experience                = parse_str(row.get("Experiece"))
                 artist.youtube_views             = parse_int(row.get("Youtube views"))
                 artist.spotify_monthly_listeners = parse_int(row.get("Spotify listeners"))
                 artist.rating                    = parse_float(row.get("Rating"))
